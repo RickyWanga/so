@@ -1,4 +1,4 @@
-# SO Davoli — Ripasso C1, C2, G1
+# SO Davoli - Ripasso C1, C2, G1
 
 Sito Vite/React per ripassare lo scritto di Sistemi Operativi dell'Università di Bologna. Contiene:
 
@@ -13,7 +13,7 @@ Le tracce 2026 non ancora presenti nell'archivio ufficiale sono marcate come **r
 
 ## Avvio locale
 
-Requisiti: Node.js 22 o compatibile.
+Requisiti: Node.js 20 o successivo.
 
 ```bash
 npm install
@@ -31,15 +31,12 @@ npm run preview
 
 ## Deploy su Coolify
 
-La repository contiene un `Dockerfile` multi-stage già pronto.
-
 1. Crea una nuova risorsa **Application** in Coolify.
 2. Collega la repository GitHub.
-3. Seleziona il deploy tramite **Dockerfile**.
-4. Non impostare una porta pubblica custom: il container espone la porta `80`.
-5. Aggiungi il dominio e avvia il deploy.
-
-Il percorso `/healthz` restituisce `200 ok` ed è utilizzabile come health check.
+3. Seleziona **Nixpacks** come build pack.
+4. Imposta la porta esposta su `3000`.
+5. Non aggiungere comandi di build o avvio personalizzati: Coolify userà `npm run build` e `npm start`.
+6. Aggiungi il dominio e avvia il deploy.
 
 ## Pubblicazione manuale su GitHub
 
