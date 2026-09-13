@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { exercises, parts, topics } from './data/exercises.js'
+import { g2Areas, g2Questions } from './data/g2.js'
 import {
   finalRanking,
   forecasts,
@@ -14,6 +15,7 @@ const navItems = [
   ['prediction', 'Previsione'],
   ['patterns', 'Pattern'],
   ['exercises', 'Esercizi'],
+  ['g2', 'G2'],
   ['simulator', 'Simulatore'],
   ['archive', 'Archivio'],
   ['checklist', 'Checklist'],
@@ -51,7 +53,7 @@ function App() {
           <span className="brand-mark">SO</span>
           <span>
             <strong>Davoli Ripasso</strong>
-            <small>C1 / C2 / G1</small>
+            <small>C1 / C2 / G1 / G2</small>
           </span>
         </button>
 
@@ -84,6 +86,7 @@ function App() {
         {activePage === 'prediction' && <PredictionPage />}
         {activePage === 'patterns' && <PatternsPage navigate={navigate} />}
         {activePage === 'exercises' && <ExercisesPage />}
+        {activePage === 'g2' && <G2Page />}
         {activePage === 'simulator' && <SimulatorPage />}
         {activePage === 'archive' && <ArchivePage />}
         {activePage === 'checklist' && <ChecklistPage />}
@@ -111,10 +114,10 @@ function HomePage({ navigate }) {
       <section className="hero page-width">
         <div className="hero-copy">
           <span className="eyebrow">Scritto di Sistemi Operativi</span>
-          <h1>Ripasso mirato, senza G2 e senza previsioni magiche.</h1>
+          <h1>Ripasso mirato, senza previsioni magiche.</h1>
           <p>
             Un sito per allenare i pattern che ritornano davvero: monitor, semafori,
-            message passing e G1. La previsione di luglio 2026 e separata dai fatti
+            message passing, G1 e le domande teoriche del G2. La previsione di luglio 2026 e separata dai fatti
             ufficiali e ogni ricostruzione non pubblicata e marcata chiaramente.
           </p>
           <div className="hero-actions">
@@ -595,6 +598,95 @@ function CodeBlock({ code }) {
         <button type="button" onClick={copyCode}>{copied ? 'Copiato' : 'Copia'}</button>
       </div>
       <pre><code>{code}</code></pre>
+    </div>
+  )
+}
+
+function G2Page() {
+  const [query, setQuery] = useState('')
+  const [area, setArea] = useState('Tutte')
+  const [hotOnly, setHotOnly] = useState(false)
+
+  const filtered = useMemo(() => {
+    const needle = query.trim().toLowerCase()
+    return g2Questions.filter((item) => {
+      if (area !== 'Tutte' && item.area !== area) return false
+      if (hotOnly && !item.hot) return false
+      if (!needle) return true
+      const haystack = [item.question, item.area, item.answer, item.source].join(' ').toLowerCase()
+      return haystack.includes(needle)
+    })
+  }, [query, area, hotOnly])
+
+  return (
+    <div className="page-width page-stack">
+      <SectionHeader
+        eyebrow="Domande teoriche"
+        title="G2: domanda e risposta in due minuti"
+        description="Le domande che ritornano negli appelli, con la risposta da scrivere allo scritto. Quelle calde nel 2026 sono marcate Hot."
+      />
+
+      <div className="filters panel">
+        <label className="search-field">
+          <span>Cerca</span>
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="es. salt, knot, RAID, TLB..."
+          />
+        </label>
+        <label>
+          <span>Area</span>
+          <select value={area} onChange={(event) => setArea(event.target.value)}>
+            {g2Areas.map((item) => <option value={item} key={item}>{item}</option>)}
+          </select>
+        </label>
+        <label className="toggle-label">
+          <input type="checkbox" checked={hotOnly} onChange={(event) => setHotOnly(event.target.checked)} />
+          <span>Solo Hot 2026</span>
+        </label>
+      </div>
+
+      <div className="result-line">
+        <strong>{filtered.length}</strong> domande trovate
+        <span>{g2Questions.length} totali</span>
+      </div>
+
+      <div className="exercise-list">
+        {filtered.map((item) => (
+          <details className="exercise-card" id={item.id} key={item.id}>
+            <summary>
+              <div className="exercise-summary-main">
+                <div className="card-topline">
+                  <span className="topic-badge">{item.area}</span>
+                  {item.hot && <span className="focus-badge">Hot</span>}
+                </div>
+                <h2>{item.question}</h2>
+              </div>
+              <div className="exercise-summary-side">
+                <span className="details-label">Risposta</span>
+              </div>
+            </summary>
+
+            <div className="exercise-body">
+              <div className="source-line">
+                <span>Uscita: {item.source}</span>
+              </div>
+
+              <div className="idea-box">
+                <span>Risposta</span>
+                <p>{item.answer}</p>
+              </div>
+            </div>
+          </details>
+        ))}
+        {filtered.length === 0 && (
+          <div className="empty-state">
+            <h3>Nessuna domanda con questi filtri</h3>
+            <p>Riduci i filtri oppure cerca un meccanismo piu generale.</p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

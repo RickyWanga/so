@@ -1,13 +1,13 @@
-# SO Davoli - Ripasso C1, C2, G1
+# SO Davoli - Ripasso C1, C2, G1, G2
 
 Sito Vite/React per ripassare lo scritto di Sistemi Operativi dell'Università di Bologna. Contiene:
 
 - valutazione prudente della previsione per luglio 2026;
 - archivio giugno/luglio 2017–2026;
 - esercizi svolti di monitor, semafori, message passing e G1;
+- domande e risposte G2 per area, con filtro e marcatura Hot 2026;
 - pattern, invarianti, tranelli e checklist;
-- ricerca, filtri e progresso salvato nel browser;
-- nessun contenuto G2, per scelta.
+- ricerca, filtri e progresso salvato nel browser.
 
 Le tracce 2026 non ancora presenti nell'archivio ufficiale sono marcate come **ricostruzioni**. Le soluzioni sono materiale didattico non ufficiale.
 
