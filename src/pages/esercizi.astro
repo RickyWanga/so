@@ -1,0 +1,82 @@
+---
+import Base from '../layouts/Base.astro';
+import { exercises, parts, topics } from '../data/exercises.js';
+---
+<Base title="Esercizi" active="/esercizi/">
+  <span class="eyebrow">Esercizi svolti</span>
+  <h1>Soluzioni ragionate per C1, C2 e G1</h1>
+  <p class="lead">Le ricostruzioni sono etichettate; gli altri esercizi rimandano al PDF ufficiale quando disponibile.</p>
+
+  <div class="filters">
+    <label class="grow">Cerca
+      <input type="text" id="q" placeholder="es. testimone, FIFO, Gantt..." />
+    </label>
+    <label>Parte
+      <select id="part">
+        {parts.map((p) => <option value={p}>{p}</option>)}
+      </select>
+    </label>
+    <label>Argomento
+      <select id="topic">
+        {topics.map((t) => <option value={t}>{t}</option>)}
+      </select>
+    </label>
+    <label class="checkline"><input type="checkbox" id="focus" /> Solo focus</label>
+  </div>
+  <p class="result-line"><strong id="count"></strong> esercizi trovati <span id="total"></span></p>
+
+  <div class="grid" id="list" style="grid-template-columns: 1fr;"></div>
+  <p class="empty" id="empty" hidden>Nessun esercizio con questi filtri.</p>
+</Base>
+
+<script id="ex-data" type="application/json" set:html={JSON.stringify(exercises)} />
+
+<script is:inline>
+  const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const data = JSON.parse(document.getElementById('ex-data').textContent);
+  const $ = (id) => document.getElementById(id);
+  const params = new URLSearchParams(location.search);
+  if (params.get('part')) $('part').value = params.get('part');
+  if (params.get('topic')) $('topic').value = params.get('topic');
+
+  function render() {
+    const needle = $('q').value.trim().toLowerCase();
+    const list = $('list');
+    list.innerHTML = '';
+    let n = 0;
+    for (const e of data) {
+      if ($('part').value !== 'Tutte' && e.part !== $('part').value) continue;
+      if ($('topic').value !== 'Tutti' && e.topic !== $('topic').value) continue;
+      if ($('focus').checked && !e.focus) continue;
+      if (needle && ![e.title, e.topic, e.statement, e.idea, e.source].join(' ').toLowerCase().includes(needle)) continue;
+      n++;
+      const el = document.createElement('details');
+      el.className = 'card';
+      el.innerHTML =
+        '<summary><div class="badges"><span class="badge part">' + esc(e.part) + '</span>' +
+        '<span class="badge">' + esc(e.topic) + '</span>' +
+        (e.focus ? '<span class="badge hot">Focus</span>' : '') +
+        (e.reconstructed ? '<span class="badge">Ricostruito</span>' : '') + '</div>' +
+        '<h3>' + esc(e.title) + '</h3><p>' + esc(e.statement) + '</p>' +
+        '<span class="open-hint">Apri</span></summary>' +
+        '<div class="card-body">' +
+        '<p class="source-line">Fonte: ' + esc(e.source) +
+        (e.sourceUrl ? ' — <a href="' + esc(e.sourceUrl) + '" target="_blank" rel="noreferrer">PDF ufficiale ↗</a>' : '') + '</p>' +
+        '<p><span class="idea-label">Idea guida</span><br>' + esc(e.idea) + '</p>' +
+        '<pre><code>' + esc(e.solution) + '</code></pre>' +
+        '<div class="two-col"><div><h3>Controlli</h3><ul class="tight">' +
+        (e.invariants || []).map((x) => '<li>' + esc(x) + '</li>').join('') +
+        '</ul></div><div><h3>Errori tipici</h3><ul class="tight">' +
+        (e.pitfalls || []).map((x) => '<li>' + esc(x) + '</li>').join('') +
+        '</ul></div></div></div>';
+      list.appendChild(el);
+    }
+    $('count').textContent = n;
+    $('total').textContent = data.length + ' totali';
+    $('empty').hidden = n > 0;
+  }
+  ['q', 'part', 'topic', 'focus'].forEach((id) =>
+    $(id).addEventListener('input', render),
+  );
+  render();
+</script>

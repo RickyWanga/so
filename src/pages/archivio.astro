@@ -1,0 +1,75 @@
+---
+import Base from '../layouts/Base.astro';
+import { recentOfficialExams, summerPairs } from '../data/prediction.js';
+
+const officialArchiveUrl = 'https://www.cs.unibo.it/~renzo/so/compiti-so.shtml';
+---
+<Base title="Archivio" active="/archivio/">
+  <span class="eyebrow">Fonti</span>
+  <h1>Archivio dei compiti scritti</h1>
+  <p class="lead">
+    Esercizi C1/C2/G1 e domande G2, con rimandi ai PDF ufficiali quando disponibili.
+    <a class="button primary" href={officialArchiveUrl} target="_blank" rel="noreferrer" style="margin-left:0.5rem;">Apri archivio ufficiale</a>
+  </p>
+
+  <section class="block">
+    <span class="eyebrow">Ultimi compiti pubblicati</span>
+    <h2>2025-2026</h2>
+    <div class="grid">
+      {recentOfficialExams.map((exam) => (
+        <a class="card" href={exam.url} target="_blank" rel="noreferrer" style="text-decoration:none;color:inherit;">
+          <span class="badge">{exam.date}</span>
+          <h3>{exam.c1}</h3>
+          <p><strong>C2:</strong> {exam.c2}</p>
+          <p><strong>G1:</strong> {exam.g1}</p>
+          <p>PDF ufficiale ↗</p>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="panel-box">
+      <span class="eyebrow">Serie estiva</span>
+      <h2>Giugno e luglio 2017-2025</h2>
+      <div class="table-scroll">
+        <table class="data">
+          <thead><tr><th>Anno</th><th>Giugno C1</th><th>Giugno C2</th><th>Giugno G1</th><th>Luglio C1</th><th>Luglio C2</th><th>Luglio G1</th></tr></thead>
+          <tbody>
+            {summerPairs.map((pair) => (
+              <tr>
+                <td><strong>{pair.year}</strong></td>
+                <td><a href={pair.june.url} target="_blank" rel="noreferrer">{pair.june.c1}</a></td>
+                <td>{pair.june.c2}</td>
+                <td>{pair.june.g1}</td>
+                <td><a href={pair.july.url} target="_blank" rel="noreferrer">{pair.july.c1}</a></td>
+                <td>{pair.july.c2}</td>
+                <td>{pair.july.g1}</td>
+              </tr>
+            ))}
+            <tr>
+              <td><strong>2026</strong> <span class="badge">segnalato</span></td>
+              <td colSpan="6">Contenuti ricostruiti, in attesa del PDF ufficiale.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="grid">
+      <article class="card">
+        <span class="badge">Ufficiale</span>
+        <h3>Archivio Davoli</h3>
+        <p>Fonte primaria per testi, date e classificazione.</p>
+        <p><a href={officialArchiveUrl} target="_blank" rel="noreferrer">Apri ↗</a></p>
+      </article>
+      <article class="card">
+        <span class="badge">Appunti</span>
+        <h3>Materiale secondario</h3>
+        <p>Usato per confrontare pattern e svolgimenti, mai come soluzione ufficiale.</p>
+      </article>
+    </div>
+  </section>
+</Base>

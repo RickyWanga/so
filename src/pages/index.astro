@@ -1,0 +1,83 @@
+---
+import Base from '../layouts/Base.astro';
+import { exercises } from '../data/exercises.js';
+import { g2Questions } from '../data/g2.js';
+import { finalRanking } from '../data/prediction.js';
+
+const focus = exercises.filter((e) => e.focus).slice(0, 6);
+const hot = g2Questions.filter((q) => q.hot).slice(0, 6);
+---
+<Base title="Home" active="/">
+  <section class="hero">
+    <div>
+      <span class="eyebrow">Scritto di Sistemi Operativi</span>
+      <h1>Ripasso mirato, senza previsioni magiche.</h1>
+      <p class="lead">
+        Monitor, semafori, message passing, G1 e le domande teoriche del G2:
+        pattern che ritornano, template pronti e statistiche dagli appelli veri.
+      </p>
+      <div class="hero-actions">
+        <a class="button primary" href="/esercizi/">Apri gli esercizi</a>
+        <a class="button" href="/g2/">Vai alle domande G2</a>
+      </div>
+    </div>
+    <div class="panel-box">
+      <span class="eyebrow">Priorità di ripasso</span>
+      {finalRanking.map((row, i) => (
+        <div class="priority-row">
+          <span class="badge part">{row.part}</span>
+          <div><strong>{i + 1}. {row.first}</strong><small>Seconda scelta: {row.second}</small></div>
+        </div>
+      ))}
+      <p><a href="/template/">Vedi template e checklist →</a></p>
+    </div>
+  </section>
+
+  <section class="block">
+    <span class="eyebrow">Domande calde</span>
+    <h2>G2: le risposte che escono di più</h2>
+    <div class="grid">
+      {hot.map((q) => (
+        <article class="card">
+          <div class="badges"><span class="badge">{q.area}</span></div>
+          <h3>{q.question}</h3>
+          <p>{q.answer.slice(0, 140)}…</p>
+          <p><a href="/g2/">Leggi la risposta →</a></p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="block">
+    <span class="eyebrow">Parti da qui</span>
+    <h2>Sei esercizi ad alto rendimento</h2>
+    <div class="grid">
+      {focus.map((e) => (
+        <article class="card">
+          <div class="badges">
+            <span class="badge part">{e.part}</span>
+            <span class="badge">{e.topic}</span>
+          </div>
+          <h3>{e.title}</h3>
+          <p>{e.idea}</p>
+          <p><a href="/esercizi/">Apri soluzione →</a></p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="block">
+    <span class="eyebrow">Metodo</span>
+    <h2>Prima l'invariante, poi il codice.</h2>
+    <div class="panel-box">
+      <ol class="tight">
+        <li>Quale stato condiviso descrive il problema?</li>
+        <li>Chi si blocca, su quale condizione o semaforo?</li>
+        <li>Quale evento rende vera la guardia?</li>
+        <li>Chi passa il testimone o apre la fase successiva?</li>
+        <li>Un nuovo arrivato può mescolarsi al gruppo vecchio?</li>
+      </ol>
+      <p><a href="/template/">Tutti i pattern e i template →</a></p>
+    </div>
+  </section>
+</Base>

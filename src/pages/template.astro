@@ -1,0 +1,110 @@
+---
+import Base from '../layouts/Base.astro';
+import { patternGroups } from '../data/patterns.js';
+import { templates } from '../data/templates.js';
+
+const exLink = (part, topic) =>
+  `/esercizi/?part=${encodeURIComponent(part)}&topic=${encodeURIComponent(topic)}`;
+
+const patternLinks = {
+  'Generazioni e snapshot': ['C1', 'Generazioni'],
+  'Rendez-vous esatto': ['C1', 'Rendez-vous'],
+  'Risveglio selettivo': ['C1', 'Classi e snapshot'],
+  'Scenario a fasi': ['C1', 'Tutti'],
+  'Passaggio del testimone': ['C2', 'Semafori'],
+  'Semaforo per classe': ['C2', 'Semafori'],
+  'Semafori privati': ['C2', 'Semafori custom'],
+  'Credito o consegna diretta': ['C2', 'Semafori custom'],
+  'Inbox locale': ['C2', 'Message passing'],
+  'Sincronia con ACK': ['C2', 'Message passing'],
+  'Marker a se stessi': ['C2', 'Message passing'],
+  'Frammentazione': ['C2', 'Message passing'],
+  'Registro degli eventi': ['G1', 'Scheduling'],
+  'Page replacement': ['G1', 'Page replacement'],
+  'FAT / fsck come grafo': ['G1', 'File system'],
+  'Banchiere vettoriale': ['G1', 'Banchiere'],
+};
+
+const templateParts = ['C1 — Monitor', 'C2 — Semafori', 'C2 — Message Passing', 'G1 — Scheduling'];
+
+const checklist = [
+  { title: 'Prima di scrivere C1/C2', items: ['Elenca attori e classi di attesa.', 'Scrivi stato condiviso e invariante.', 'Associa ogni wait/P a chi può sbloccarla.', 'Decidi come separare generazioni e nuovi arrivi.'] },
+  { title: 'Semafori', items: ['Ogni V ha un destinatario concettuale preciso.', 'Durante il testimone il mutex resta chiuso.', "L'ultimo processo riapre il cancello.", 'Nessun segnale rimane accumulato per errore.', 'Se servono scelte precise, usa classi o semafori privati.'] },
+  { title: 'Monitor', items: ['Ragiona con condition signal-urgent.', 'Aggiorna lo stato prima del signal.', 'Congela il risultato prima di risvegliare un gruppo.', 'Verifica che il monitor sia riutilizzabile.'] },
+  { title: 'Message passing', items: ['Messaggi con sender, tag e sequence quando necessario.', 'Nessun messaggio non richiesto viene perso.', 'ACK inviato nel momento semantico corretto.', 'ANY e FIFO per mittente sono preservati.'] },
+  { title: 'G1 scheduling', items: ['Disegna CPU, ogni unità I/O e ready queue separatamente.', 'Registra arrivi, fine burst, fine I/O, quanto e preemption.', 'Dichiara la regola per eventi simultanei.', 'Controlla la somma dei burst di ogni processo.'] },
+  { title: 'Ultimi dieci minuti', items: ['Inizializzazioni di semafori e contatori.', 'Segni <, <=, >, >= nelle guardie.', 'Processi che potrebbero restare bloccati.', 'Reset della generazione precedente.', 'Numero di page fault e vittime motivate.'] },
+];
+---
+<Base title="Template e metodo" active="/template/">
+  <span class="eyebrow">Metodo</span>
+  <h1>Riconosci, applica, verifica</h1>
+  <p class="lead">Prima il pattern, poi il template di codice, infine la checklist prima di consegnare.</p>
+
+  {patternGroups.map((group) => (
+    <section class="block">
+      <h2>{group.label}</h2>
+      <div class="grid">
+        {group.patterns.map((p) => (
+          <article class="card">
+            <h3>{p.name}</h3>
+            <p><strong>Riconoscilo — </strong>{p.trigger}</p>
+            <p><strong>Ricetta — </strong>{p.recipe}</p>
+            <p>{p.checks.join(' · ')}</p>
+            {patternLinks[p.name] && (
+              <p><a href={exLink(...patternLinks[p.name])}>Vedi esempi svolti →</a></p>
+            )}
+          </article>
+        ))}
+      </div>
+    </section>
+  ))}
+
+  {templateParts.map((part) => (
+    <section class="block">
+      <span class="eyebrow">Template di codice</span>
+      <h2>{part}</h2>
+      {templates.filter((t) => t.part === part).map((t) => (
+        <details class="card" style="margin-top: 0.75rem;">
+          <summary><h3>{t.title}</h3><span class="open-hint">Codice</span></summary>
+          <div class="card-body">
+            {t.intro && <p><strong>Regola — </strong>{t.intro}</p>}
+            {t.code && <pre><code>{t.code}</code></pre>}
+          </div>
+        </details>
+      ))}
+    </section>
+  ))}
+
+  <section class="block">
+    <span class="eyebrow">Controllo finale</span>
+    <h2>Checklist prima di consegnare</h2>
+    <div class="check-grid">
+      {checklist.map((s) => (
+        <article class="card">
+          <h3>{s.title}</h3>
+          {s.items.map((item) => (
+            <label style="display:flex;gap:0.5rem;align-items:flex-start;padding:0.3rem 0;font-size:0.93rem;">
+              <input type="checkbox" style="margin-top:0.3rem;" />
+              <span>{item}</span>
+            </label>
+          ))}
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="panel-box">
+      <span class="eyebrow">Ordine consigliato</span>
+      <h2>C1 solido, poi punti in G, quindi C2.</h2>
+      <div class="steps">
+        <div><strong>1</strong><span>Leggi tutto e riconosci i pattern.</span></div>
+        <div><strong>2</strong><span>Metti al sicuro C1, la parte più stabile.</span></div>
+        <div><strong>3</strong><span>Avvia G1 o la parte generale più lineare.</span></div>
+        <div><strong>4</strong><span>Affronta C2 con invariante e testimone espliciti.</span></div>
+        <div><strong>5</strong><span>Lascia il 10-15% del tempo alla verifica.</span></div>
+      </div>
+    </div>
+  </section>
+</Base>

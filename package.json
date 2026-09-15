@@ -1,21 +1,14 @@
 {
   "name": "so-davoli-ripasso",
   "private": true,
-  "version": "1.0.0",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
-    "build": "vite build",
-    "preview": "vite preview --host 0.0.0.0",
-    "start": "serve -s dist -l tcp://0.0.0.0:${PORT:-3000}"
+    "dev": "astro dev --host 0.0.0.0",
+    "build": "astro build",
+    "preview": "astro preview --host 0.0.0.0"
   },
   "dependencies": {
-    "react": "19.2.7",
-    "react-dom": "19.2.7",
-    "serve": "14.2.6"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-react": "4.7.0",
-    "vite": "6.4.3"
+    "astro": "^7.3.2"
   }
 }

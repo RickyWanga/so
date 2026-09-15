@@ -1,0 +1,113 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Simulatore" active="/simulatore/">
+  <span class="eyebrow">Laboratorio G1</span>
+  <h1>Simulatore FIFO e LRU</h1>
+  <p class="lead">Usalo per costruire controesempi: FIFO non cambia ordine su hit, LRU aggiorna la recenza a ogni riferimento.</p>
+
+  <div class="filters">
+    <label class="grow">Stringa di riferimenti
+      <input type="text" id="refs" value="1 2 3 4 1 2 3 5 1" />
+    </label>
+    <label>Numero di frame
+      <input type="number" id="frames" value="4" min="1" max="12" />
+    </label>
+  </div>
+  <div class="filters" style="margin-top:0.5rem;">
+    <span style="color:var(--muted);font-size:0.85rem;">Preset:</span>
+    <button class="button ghost" type="button" data-preset="1 2 3 4 1 2 3 5 1">FIFO peggio</button>
+    <button class="button ghost" type="button" data-preset="1 2 3 4 5 1 2 3 4 5">Fault ciclici</button>
+    <button class="button ghost" type="button" data-preset="1 2 3 4 1 2 5 1 2 3 4 5">Belady classica</button>
+  </div>
+
+  <div class="sim-grid" id="out"></div>
+
+  <section class="block">
+    <div class="panel-box">
+      <span class="eyebrow">Ricetta per differenziare FIFO e LRU</span>
+      <h2>Riempi, cambia la recenza, inserisci, richiama.</h2>
+      <ol class="tight">
+        <li>Riempi tutti i frame.</li>
+        <li>Fai hit sulle pagine che vuoi rendere recenti per LRU.</li>
+        <li>Inserisci una pagina nuova: FIFO e LRU devono scegliere vittime diverse.</li>
+        <li>Riferisci la pagina espulsa da FIFO ma conservata da LRU.</li>
+      </ol>
+    </div>
+  </section>
+</Base>
+
+<script is:inline>
+  const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  function simulate(references, frameCount, algorithm) {
+    const frames = [];
+    const fifoQueue = [];
+    const lastUsed = new Map();
+    const steps = [];
+    let faults = 0;
+    references.forEach((page, index) => {
+      const hit = frames.includes(page);
+      let victim = null;
+      if (!hit) {
+        faults++;
+        if (frames.length < frameCount) {
+          frames.push(page);
+          if (algorithm === 'FIFO') fifoQueue.push(page);
+        } else if (algorithm === 'FIFO') {
+          victim = fifoQueue.shift();
+          frames[frames.indexOf(victim)] = page;
+          fifoQueue.push(page);
+        } else {
+          victim = frames.reduce((least, candidate) => {
+            const lt = lastUsed.get(least) ?? -1;
+            const ct = lastUsed.get(candidate) ?? -1;
+            return ct < lt ? candidate : least;
+          }, frames[0]);
+          frames[frames.indexOf(victim)] = page;
+          lastUsed.delete(victim);
+        }
+      }
+      if (algorithm === 'LRU') lastUsed.set(page, index);
+      steps.push({ index, page, hit, victim, frames: frames.slice() });
+    });
+    return { algorithm, faults, steps };
+  }
+
+  function render() {
+    const refs = document.getElementById('refs').value
+      .split(/[\s,;]+/).map((x) => x.trim()).filter(Boolean)
+      .map(Number).filter((x) => Number.isFinite(x));
+    const n = Math.min(12, Math.max(1, Number(document.getElementById('frames').value) || 1));
+    const out = document.getElementById('out');
+    if (!refs.length) {
+      out.innerHTML = '<p class="empty">Inserisci almeno un riferimento valido.</p>';
+      return;
+    }
+    out.innerHTML = ['FIFO', 'LRU'].map((algo) => {
+      const r = simulate(refs, n, algo);
+      const rows = r.steps.map((s) =>
+        '<tr><td>' + (s.index + 1) + '</td><td><strong>' + esc(s.page) + '</strong></td><td><span class="frames">' +
+        Array.from({ length: n }, (_, i) =>
+          '<span class="' + (s.frames[i] === s.page ? 'cur' : '') + '">' + (s.frames[i] ?? '-') + '</span>',
+        ).join('') +
+        '</span></td><td><span class="chip ' + (s.hit ? 'hit' : 'fault') + '">' + (s.hit ? 'HIT' : 'FAULT') + '</span></td>' +
+        '<td>' + (s.victim ?? '-') + '</td></tr>',
+      ).join('');
+      return '<section class="panel-box"><span class="eyebrow">Algoritmo</span><h2>' + algo +
+        ' — <span class="fault-count">' + r.faults + '</span> page fault</h2>' +
+        '<div class="table-scroll"><table class="sim"><thead><tr><th>#</th><th>Ref</th><th>Frame</th><th>Esito</th><th>Vittima</th></tr></thead>' +
+        '<tbody>' + rows + '</tbody></table></div></section>';
+    }).join('');
+  }
+
+  document.getElementById('refs').addEventListener('input', render);
+  document.getElementById('frames').addEventListener('input', render);
+  document.querySelectorAll('[data-preset]').forEach((b) =>
+    b.addEventListener('click', () => {
+      document.getElementById('refs').value = b.dataset.preset;
+      render();
+    }),
+  );
+  render();
+</script>
