@@ -1,8 +1,9 @@
-node_modules
+
+.astro
+.astro/
 dist
+.DS_Store
 .env
 .env.*
 *.log
-.DS_Store
-
-.astro
+node_modules
