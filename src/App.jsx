@@ -1,5 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
-import { exercises, parts, topics } from './data/exercises.js'
+import { exercises, parts } from './data/exercises.js'
+import { g1schedA } from './data/g1schedA.js'
+import { g1schedB } from './data/g1schedB.js'
+import { g1rimp } from './data/g1rimp.js'
+
+const allExercises = [...exercises, ...g1schedA, ...g1schedB, ...g1rimp]
+const allTopics = ['Tutti', ...Array.from(new Set(allExercises.map((e) => e.topic))).sort()]
 import { g2Areas, g2Questions } from './data/g2.js'
 import { templates } from './data/templates.js'
 import { g1Recent, g1Stats, g2New, g2Stats, g2Top } from './data/stats.js'
@@ -36,6 +42,14 @@ function normalizeHash() {
 function App() {
   const [route, setRoute] = useState(normalizeHash)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [dark, setDark] = useState(() => {
+    if (typeof window === 'undefined') return true
+    try {
+      const saved = window.localStorage.getItem('so-theme')
+      if (saved) return saved === 'dark'
+    } catch {}
+    return !window.matchMedia('(prefers-color-scheme: light)').matches
+  })
   const activePage = route.page
 
   useEffect(() => {
@@ -43,6 +57,13 @@ function App() {
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
   }, [])
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light'
+    try {
+      window.localStorage.setItem('so-theme', dark ? 'dark' : 'light')
+    } catch {}
+  }, [dark])
 
   function navigate(page, arg1, arg2) {
     const extra = [arg1, arg2].filter(Boolean).map((s) => encodeURIComponent(s)).join('/')
@@ -84,6 +105,15 @@ function App() {
               {label}
             </button>
           ))}
+          <button
+            type="button"
+            className="nav-link theme-toggle"
+            onClick={() => setDark((value) => !value)}
+            aria-label="Cambia tema chiaro/scuro"
+            title="Cambia tema"
+          >
+            {dark ? '☀' : '☾'}
+          </button>
         </nav>
       </header>
 
@@ -107,6 +137,10 @@ function App() {
         <div>
           <strong>SO Davoli Ripasso</strong>
           <p>Materiale didattico non ufficiale. Le soluzioni vanno sempre verificate sul testo completo.</p>
+          <p>
+            Di Ricky Wanga · <a href="https://x.com/rickywanga42" target="_blank" rel="noreferrer">X @rickywanga42</a> ·{' '}
+            <a href="https://rickywanga.com" target="_blank" rel="noreferrer">rickywanga.com</a>
+          </p>
         </div>
         <div className="footer-links">
           <a href={officialArchiveUrl} target="_blank" rel="noreferrer">Archivio ufficiale</a>
@@ -486,7 +520,7 @@ function ExercisesPage({ initialPart, initialTopic }) {
     initialPart && parts.includes(initialPart) ? initialPart : 'Tutte',
   )
   const [topic, setTopic] = useState(
-    initialTopic && topics.includes(initialTopic) ? initialTopic : 'Tutti',
+    initialTopic && allTopics.includes(initialTopic) ? initialTopic : 'Tutti',
   )
   const [focusOnly, setFocusOnly] = useState(false)
   const [linkNotice, setLinkNotice] = useState(
@@ -505,7 +539,7 @@ function ExercisesPage({ initialPart, initialTopic }) {
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase()
-    return exercises.filter((exercise) => {
+    return allExercises.filter((exercise) => {
       if (part !== 'Tutte' && exercise.part !== part) return false
       if (topic !== 'Tutti' && exercise.topic !== topic) return false
       if (focusOnly && !exercise.focus) return false
@@ -547,7 +581,7 @@ function ExercisesPage({ initialPart, initialTopic }) {
         <label>
           <span>Argomento</span>
           <select value={topic} onChange={(event) => setTopic(event.target.value)}>
-            {topics.map((item) => <option value={item} key={item}>{item}</option>)}
+            {allTopics.map((item) => <option value={item} key={item}>{item}</option>)}
           </select>
         </label>
         <label className="toggle-label">
@@ -558,7 +592,7 @@ function ExercisesPage({ initialPart, initialTopic }) {
 
       <div className="result-line">
         <strong>{filtered.length}</strong> esercizi trovati
-        <span>{exercises.length} totali</span>
+        <span>{allExercises.length} totali</span>
         {linkNotice && (
           <span className="link-notice">
             {linkNotice}
@@ -612,6 +646,19 @@ function ExerciseCard({ exercise }) {
           <span>Idea guida</span>
           <p>{exercise.idea}</p>
         </div>
+
+        {exercise.diagrams && exercise.diagrams.length > 0 && (
+          <div className="diagram-list">
+            {exercise.diagrams.map((slug) => (
+              <img
+                key={slug}
+                loading="lazy"
+                src={`/gantt/${slug}.png`}
+                alt={`Diagramma ${exercise.title}`}
+              />
+            ))}
+          </div>
+        )}
 
         <CodeBlock code={exercise.solution} />
 
@@ -776,7 +823,7 @@ function StatisticsPage({ navigate }) {
       <SectionHeader
         eyebrow="Statistiche dagli appelli"
         title="Cosa esce davvero"
-        description="G1: 48 appelli 2017-2026. G2: 12 appelli 2024-2026, 4 domande per appello. Clicca un tipo per vedere gli esempi svolti."
+        description="G1: 40 appelli classificati su 48 (2017-2026). G2: 12 appelli 2024-2026, 4 domande per appello. Clicca un tipo per vedere gli esempi svolti."
       />
 
       <section className="panel section-panel">
