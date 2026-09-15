@@ -29,7 +29,7 @@ const topics = ['Tutti', ...Array.from(new Set(all.map((e) => e.topic))).sort()]
     </label>
     <label class="riga"><input type="checkbox" id="focus" /> Solo focus</label>
   </div>
-  <p class="conteggio"><strong id="count"></strong> esercizi · <span id="total"></span></p>
+  <p class="conteggio"><strong id="count"></strong> esercizi · <span id="total"></span> <span id="notice" hidden></span></p>
 
   <div id="list"></div>
   <p class="vuoto" id="empty" hidden>Niente con questi filtri: allarga la ricerca.</p>
@@ -44,6 +44,14 @@ const topics = ['Tutti', ...Array.from(new Set(all.map((e) => e.topic))).sort()]
   const params = new URLSearchParams(location.search);
   if (params.get('part')) $('part').value = params.get('part');
   if (params.get('topic')) $('topic').value = params.get('topic');
+  const fromLink = params.get('part') || params.get('topic');
+  const notice = $('notice');
+  function paintNotice() {
+    if (!fromLink) return;
+    notice.hidden = false;
+    notice.innerHTML = ' · Filtro da link: ' + esc($('part').value) + ' · ' + esc($('topic').value) +
+      ' <a href="/esercizi/" style="margin-left:0.4rem;">Azzera</a>';
+  }
 
   function render() {
     const needle = $('q').value.trim().toLowerCase();
@@ -84,6 +92,7 @@ const topics = ['Tutti', ...Array.from(new Set(all.map((e) => e.topic))).sort()]
     $('count').textContent = n;
     $('total').textContent = data.length + ' totali';
     $('empty').hidden = n > 0;
+    paintNotice();
   }
   ['q', 'part', 'topic', 'focus'].forEach((id) =>
     $(id).addEventListener('input', render),

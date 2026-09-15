@@ -18,7 +18,7 @@ import { g2Areas, g2Questions } from '../data/g2.js';
     </label>
     <label class="riga"><input type="checkbox" id="hot" /> Solo calde 2026</label>
   </div>
-  <p class="conteggio"><strong id="count"></strong> domande · <span id="total"></span></p>
+  <p class="conteggio"><strong id="count"></strong> domande · <span id="total"></span> <span id="notice" hidden></span></p>
 
   <div id="list"></div>
   <p class="vuoto" id="empty" hidden>Niente con questi filtri: allarga la ricerca.</p>
@@ -32,6 +32,14 @@ import { g2Areas, g2Questions } from '../data/g2.js';
   const $ = (id) => document.getElementById(id);
   const params = new URLSearchParams(location.search);
   if (params.get('area')) $('area').value = params.get('area');
+  const fromLink = params.get('area');
+  const notice = $('notice');
+  function paintNotice() {
+    if (!fromLink) return;
+    notice.hidden = false;
+    notice.innerHTML = ' · Filtro da link: ' + esc($('area').value) +
+      ' <a href="/g2/" style="margin-left:0.4rem;">Azzera</a>';
+  }
 
   function render() {
     const needle = $('q').value.trim().toLowerCase();
@@ -58,6 +66,7 @@ import { g2Areas, g2Questions } from '../data/g2.js';
     $('count').textContent = n;
     $('total').textContent = data.length + ' totali';
     $('empty').hidden = n > 0;
+    paintNotice();
   }
   ['q', 'area', 'hot'].forEach((id) => $(id).addEventListener('input', render));
   render();
