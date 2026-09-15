@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { exercises, parts, topics } from './data/exercises.js'
 import { g2Areas, g2Questions } from './data/g2.js'
 import { templates } from './data/templates.js'
+import { g1Recent, g1Stats, g2New, g2Stats, g2Top } from './data/stats.js'
 import {
   finalRanking,
   recentOfficialExams,
@@ -15,6 +16,7 @@ const navItems = [
   ['exercises', 'Esercizi'],
   ['g2', 'G2'],
   ['template', 'Template'],
+  ['stats', 'Statistiche'],
   ['simulator', 'Simulatore'],
   ['archive', 'Archivio'],
 ]
@@ -22,24 +24,30 @@ const navItems = [
 const officialArchiveUrl = 'https://www.cs.unibo.it/~renzo/so/compiti-so.shtml'
 
 function normalizeHash() {
-  if (typeof window === 'undefined') return 'home'
-  const value = window.location.hash.replace('#/', '').replace('#', '')
-  return navItems.some(([id]) => id === value) ? value : 'home'
+  if (typeof window === 'undefined') return { page: 'home' }
+  const raw = window.location.hash.replace('#/', '').replace('#', '')
+  const [page, arg1, arg2] = raw.split('/').map((s) => {
+    try { return decodeURIComponent(s) } catch { return s }
+  })
+  if (!navItems.some(([id]) => id === page)) return { page: 'home' }
+  return { page, arg1, arg2 }
 }
 
 function App() {
-  const [activePage, setActivePage] = useState(normalizeHash)
+  const [route, setRoute] = useState(normalizeHash)
   const [menuOpen, setMenuOpen] = useState(false)
+  const activePage = route.page
 
   useEffect(() => {
-    const onHash = () => setActivePage(normalizeHash())
+    const onHash = () => setRoute(normalizeHash())
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
   }, [])
 
-  function navigate(page) {
-    window.location.hash = `#/${page}`
-    setActivePage(page)
+  function navigate(page, arg1, arg2) {
+    const extra = [arg1, arg2].filter(Boolean).map((s) => encodeURIComponent(s)).join('/')
+    window.location.hash = `#/${page}${extra ? `/${extra}` : ''}`
+    setRoute(normalizeHash())
     setMenuOpen(false)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -81,9 +89,16 @@ function App() {
 
       <main>
         {activePage === 'home' && <HomePage navigate={navigate} />}
-        {activePage === 'exercises' && <ExercisesPage />}
-        {activePage === 'g2' && <G2Page />}
+        {activePage === 'exercises' && (
+          <ExercisesPage
+            key={`ex-${route.arg1 || ''}-${route.arg2 || ''}`}
+            initialPart={route.arg1}
+            initialTopic={route.arg2}
+          />
+        )}
+        {activePage === 'g2' && <G2Page key={`g2-${route.arg1 || ''}`} initialArea={route.arg1} />}
         {activePage === 'template' && <TemplatePage navigate={navigate} />}
+        {activePage === 'stats' && <StatisticsPage navigate={navigate} />}
         {activePage === 'simulator' && <SimulatorPage />}
         {activePage === 'archive' && <ArchivePage />}
       </main>
@@ -271,6 +286,28 @@ function SourceCell({ text, url }) {
   )
 }
 
+function patternExamples(name) {
+  const map = {
+    'Generazioni e snapshot': ['exercises', 'C1', 'Generazioni'],
+    'Rendez-vous esatto': ['exercises', 'C1', 'Rendez-vous'],
+    'Risveglio selettivo': ['exercises', 'C1', 'Classi e snapshot'],
+    'Scenario a fasi': ['exercises', 'C1', 'Tutti'],
+    'Passaggio del testimone': ['exercises', 'C2', 'Semafori'],
+    'Semaforo per classe': ['exercises', 'C2', 'Semafori'],
+    'Semafori privati': ['exercises', 'C2', 'Semafori custom'],
+    'Credito o consegna diretta': ['exercises', 'C2', 'Semafori custom'],
+    'Inbox locale': ['exercises', 'C2', 'Message passing'],
+    'Sincronia con ACK': ['exercises', 'C2', 'Message passing'],
+    'Marker a se stessi': ['exercises', 'C2', 'Message passing'],
+    'Frammentazione': ['exercises', 'C2', 'Message passing'],
+    'Registro degli eventi': ['exercises', 'G1', 'Scheduling'],
+    'Page replacement': ['exercises', 'G1', 'Page replacement'],
+    'FAT / fsck come grafo': ['exercises', 'G1', 'File system'],
+    'Banchiere vettoriale': ['exercises', 'G1', 'Banchiere'],
+  }
+  return map[name] || null
+}
+
 function TemplatePage({ navigate }) {
   const templateParts = ['C1 — Monitor', 'C2 — Semafori', 'C2 — Message Passing', 'G1 — Scheduling']
   const checklistSections = [
@@ -362,6 +399,18 @@ function TemplatePage({ navigate }) {
                   <div className="pattern-checks">
                     {pattern.checks.map((check) => <span key={check}>{check}</span>)}
                   </div>
+                  {(() => {
+                    const target = patternExamples(pattern.name)
+                    return target ? (
+                      <button
+                        className="text-link"
+                        type="button"
+                        onClick={() => navigate(target[0], target[1], target[2])}
+                      >
+                        Vedi esempi svolti <span aria-hidden="true">-&gt;</span>
+                      </button>
+                    ) : null
+                  })()}
                 </article>
               ))}
             </div>
@@ -431,10 +480,14 @@ function TemplatePage({ navigate }) {
   )
 }
 
-function ExercisesPage() {
+function ExercisesPage({ initialPart, initialTopic }) {
   const [query, setQuery] = useState('')
-  const [part, setPart] = useState('Tutte')
-  const [topic, setTopic] = useState('Tutti')
+  const [part, setPart] = useState(
+    initialPart && parts.includes(initialPart) ? initialPart : 'Tutte',
+  )
+  const [topic, setTopic] = useState(
+    initialTopic && topics.includes(initialTopic) ? initialTopic : 'Tutti',
+  )
   const [focusOnly, setFocusOnly] = useState(false)
 
   const filtered = useMemo(() => {
@@ -596,9 +649,11 @@ function CodeBlock({ code }) {
   )
 }
 
-function G2Page() {
+function G2Page({ initialArea }) {
   const [query, setQuery] = useState('')
-  const [area, setArea] = useState('Tutte')
+  const [area, setArea] = useState(
+    initialArea && g2Areas.includes(initialArea) ? initialArea : 'Tutte',
+  )
   const [hotOnly, setHotOnly] = useState(false)
 
   const filtered = useMemo(() => {
@@ -681,6 +736,135 @@ function G2Page() {
           </div>
         )}
       </div>
+    </div>
+  )
+}
+
+function StatisticsPage({ navigate }) {
+  const maxG1 = Math.max(...g1Stats.map((row) => row.total))
+  const maxG2 = Math.max(...g2Stats.map((row) => row.total))
+  const bar = (value, max) => ({
+    display: 'block',
+    height: '8px',
+    borderRadius: '4px',
+    background: 'var(--accent, #4c6ef5)',
+    width: `${Math.max(4, Math.round((value / max) * 100))}%`,
+    marginTop: '4px',
+  })
+
+  return (
+    <div className="page-width page-stack">
+      <SectionHeader
+        eyebrow="Statistiche dagli appelli"
+        title="Cosa esce davvero"
+        description="G1: 48 appelli 2017-2026. G2: 12 appelli 2024-2026, 4 domande per appello. Clicca un tipo per vedere gli esempi svolti."
+      />
+
+      <section className="panel section-panel">
+        <div className="panel-heading">
+          <div>
+            <span className="eyebrow">G1 2017-2026</span>
+            <h2>Tipi di esercizio per periodo</h2>
+          </div>
+        </div>
+        <div className="table-scroll">
+          <table className="evidence-table">
+            <thead>
+              <tr><th>Tipo</th><th>2017-19</th><th>2020-22</th><th>2023-24</th><th>2025-26</th><th>Tot</th><th></th></tr>
+            </thead>
+            <tbody>
+              {g1Stats.map((row) => (
+                <tr key={row.type}>
+                  <td><strong>{row.type}</strong><span style={bar(row.total, maxG1)} /></td>
+                  <td>{row.p1}</td>
+                  <td>{row.p2}</td>
+                  <td>{row.p3}</td>
+                  <td>{row.p4}</td>
+                  <td><strong>{row.total}</strong></td>
+                  <td>
+                    <button
+                      className="text-link"
+                      type="button"
+                      onClick={() => navigate(row.link[0], row.link[1], row.link[2])}
+                    >
+                      Esempi -&gt;
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="panel section-panel">
+        <div className="panel-heading">
+          <div>
+            <span className="eyebrow">G1 2025-2026</span>
+            <h2>Solo due tipi sopravvivono</h2>
+            <p>Negli ultimi 6 appelli gli altri tipi sono spariti.</p>
+          </div>
+        </div>
+        <ul className="clean-list">
+          {g1Recent.map((row) => (
+            <li key={row.type}><strong>{row.type}</strong> — {row.note}</li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="panel section-panel">
+        <div className="panel-heading">
+          <div>
+            <span className="eyebrow">G2 2024-2026</span>
+            <h2>Domande per area</h2>
+            <p>File system + sicurezza = 54% delle domande recenti.</p>
+          </div>
+        </div>
+        <div className="table-scroll">
+          <table className="evidence-table">
+            <thead>
+              <tr><th>Area</th><th>2024</th><th>2025</th><th>2026</th><th>Tot</th><th></th></tr>
+            </thead>
+            <tbody>
+              {g2Stats.map((row) => (
+                <tr key={row.area}>
+                  <td><strong>{row.area}</strong><span style={bar(row.total, maxG2)} /></td>
+                  <td>{row.y24}</td>
+                  <td>{row.y25}</td>
+                  <td>{row.y26}</td>
+                  <td><strong>{row.total}</strong></td>
+                  <td>
+                    <button
+                      className="text-link"
+                      type="button"
+                      onClick={() => navigate('g2', row.link)}
+                    >
+                      Domande -&gt;
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="panel section-panel">
+        <div className="panel-heading">
+          <div>
+            <span className="eyebrow">G2 sotto osservazione</span>
+            <h2>Top 5 e tipi nuovi</h2>
+          </div>
+        </div>
+        <h3>Le più frequenti</h3>
+        <ul className="clean-list">
+          {g2Top.map((item) => <li key={item}>{item}</li>)}
+        </ul>
+        <h3>Tipi mai visti prima del 2024</h3>
+        <ul className="clean-list">
+          {g2New.map((item) => <li key={item}>{item}</li>)}
+        </ul>
+      </section>
     </div>
   )
 }
