@@ -133,6 +133,8 @@ a:hover { text-decoration: underline; }
 .etichetta.calda { color: #fff; background: var(--bad); border-color: var(--bad); }
 .etichetta.parte { color: #fff; background: var(--text); border-color: var(--text); }
 .fonte { color: var(--muted); font-size: 0.84rem; margin: 0.55rem 0; }
+.diag { display: grid; gap: 0.7rem; margin: 0.7rem 0; }
+.diag img { width: 100%; border: 1px solid var(--border); border-radius: 6px; background: #fff; }
 .marginale {
   border-left: 2px solid var(--good); padding: 0.05rem 0 0.05rem 0.9rem; margin: 0.8rem 0;
 }

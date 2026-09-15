@@ -1,6 +1,12 @@
 ---
 import Base from '../layouts/Base.astro';
-import { exercises, parts, topics } from '../data/exercises.js';
+import { exercises, parts } from '../data/exercises.js';
+import { g1schedA } from '../data/g1schedA.js';
+import { g1schedB } from '../data/g1schedB.js';
+import { g1rimp } from '../data/g1rimp.js';
+
+const all = [...exercises, ...g1schedA, ...g1schedB, ...g1rimp];
+const topics = ['Tutti', ...Array.from(new Set(all.map((e) => e.topic))).sort()];
 ---
 <Base title="Esercizi svolti" active="/esercizi/">
   <p class="sovratitolo">Tappa I–III · Pratica</p>
@@ -29,7 +35,7 @@ import { exercises, parts, topics } from '../data/exercises.js';
   <p class="vuoto" id="empty" hidden>Niente con questi filtri: allarga la ricerca.</p>
 </Base>
 
-<script id="ex-data" type="application/json" set:html={JSON.stringify(exercises)} />
+<script id="ex-data" type="application/json" set:html={JSON.stringify(all)} />
 
 <script is:inline>
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -63,6 +69,9 @@ import { exercises, parts, topics } from '../data/exercises.js';
         '<div class="corpo">' +
         '<p class="fonte">Fonte: ' + esc(e.source) +
         (e.sourceUrl ? ' — <a href="' + esc(e.sourceUrl) + '" target="_blank" rel="noreferrer">PDF ufficiale ↗</a>' : '') + '</p>' +
+        ((e.diagrams && e.diagrams.length) ? '<div class="diag">' +
+          e.diagrams.map((d) => '<img loading="lazy" src="/gantt/' + esc(d) + '.png" alt="Diagramma ' + esc(e.title) + '" />').join('') +
+          '</div>' : '') +
         '<div class="marginale"><span class="rubrica">Idea guida</span><p>' + esc(e.idea) + '</p></div>' +
         '<pre><code>' + esc(e.solution) + '</code></pre>' +
         '<div class="colonne"><div><h3>Controlli</h3><ul class="tight">' +
