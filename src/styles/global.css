@@ -17,6 +17,21 @@
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #121417;
+  --panel: #1a1e24;
+  --code: #1e232b;
+  --border: #2c333d;
+  --text: #e8eaed;
+  --muted: #9aa0a8;
+  --accent: #7aa2f7;
+  --accent-soft: #22304d;
+  --good: #4cc38a;
+  --warn: #d9a441;
+  --bad: #e5737d;
+}
+
 * { box-sizing: border-box; }
 
 html { scroll-behavior: smooth; }
@@ -51,6 +66,7 @@ body {
 }
 .masthead nav a:hover { color: var(--text); background: var(--panel); }
 .masthead nav a.attiva { color: var(--text); font-weight: 600; background: var(--panel); }
+#tema-btn { padding: 0.3rem 0.6rem; font-size: 1rem; line-height: 1; }
 
 main { padding: 2.5rem 0 5rem; }
 
@@ -121,7 +137,14 @@ a:hover { text-decoration: underline; }
 .scheda summary h3::before { content: "+ "; color: var(--muted); font-weight: 400; }
 .scheda[open] summary h3::before { content: "– "; }
 .scheda .testo-domanda { color: var(--muted); margin: 0.25rem 0 0; font-size: 0.95rem; }
-.apri { color: var(--accent); font-size: 0.85rem; font-weight: 600; }
+.apri {
+  display: inline-block; margin-top: 0.55rem;
+  color: var(--accent); font-size: 0.85rem; font-weight: 600;
+  border: 1px solid var(--border); border-radius: 999px;
+  padding: 0.28rem 0.85rem; background: var(--panel);
+}
+.scheda summary:hover .apri { border-color: var(--accent); }
+.scheda[open] .apri { background: var(--accent-soft); }
 .scheda .corpo { padding: 0.7rem 0 0.3rem; }
 .etichette { margin-bottom: 0.25rem; }
 .etichetta {

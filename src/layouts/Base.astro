@@ -25,6 +25,13 @@ const nav = [
     <meta name="theme-color" content="#ffffff" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>{title} — Sistemi Operativi</title>
+    <script is:inline>
+      try {
+        var t = localStorage.getItem('so-theme');
+        if (!t && window.matchMedia('(prefers-color-scheme: dark)').matches) t = 'dark';
+        if (t) document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <header class="masthead">
@@ -35,6 +42,7 @@ const nav = [
             <a href={href} class={active === href ? 'attiva' : ''}>{label}</a>
           ))}
         </nav>
+        <button id="tema-btn" class="pulsante" type="button" aria-label="Cambia tema">☾</button>
       </div>
     </header>
 
@@ -53,5 +61,21 @@ const nav = [
         </p>
       </div>
     </footer>
+    <script is:inline>
+      (function () {
+        var btn = document.getElementById('tema-btn');
+        function paint() {
+          var dark = document.documentElement.dataset.theme === 'dark';
+          if (btn) btn.textContent = dark ? '☀' : '☾';
+        }
+        if (btn) btn.addEventListener('click', function () {
+          var dark = document.documentElement.dataset.theme !== 'dark';
+          document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+          try { localStorage.setItem('so-theme', dark ? 'dark' : 'light'); } catch (e) {}
+          paint();
+        });
+        paint();
+      })();
+    </script>
   </body>
 </html>
