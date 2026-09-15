@@ -6,9 +6,9 @@ const { title, active } = Astro.props;
 const nav = [
   ['/', 'Home'],
   ['/esercizi/', 'Esercizi'],
-  ['/g2/', 'G2'],
-  ['/template/', 'Template'],
-  ['/statistiche/', 'Statistiche'],
+  ['/g2/', 'Domande G2'],
+  ['/template/', 'Metodo'],
+  ['/statistiche/', 'Numeri'],
   ['/simulatore/', 'Simulatore'],
   ['/archivio/', 'Archivio'],
 ];
@@ -20,22 +20,19 @@ const nav = [
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Ripasso mirato per lo scritto di Sistemi Operativi di Renzo Davoli: C1, C2, G1 e domande G2."
+      content="Quaderno di ripasso per lo scritto di Sistemi Operativi di Renzo Davoli: C1, C2, G1 e domande G2."
     />
-    <meta name="theme-color" content="#0a0f1c" />
+    <meta name="theme-color" content="#faf6ee" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <title>{title} — SO Davoli Ripasso</title>
+    <title>{title} — Quaderno SO Davoli</title>
   </head>
   <body>
-    <header class="site-header">
+    <header class="masthead">
       <div class="wrap">
-        <a class="brand" href="/">
-          <span class="brand-mark">SO</span>
-          <span><strong>Davoli Ripasso</strong><small>C1 / C2 / G1 / G2</small></span>
-        </a>
-        <nav class="main-nav">
+        <a class="titolo" href="/">Quaderno <em>SO</em> Davoli</a>
+        <nav>
           {nav.map(([href, label]) => (
-            <a href={href} class={active === href ? 'active' : ''}>{label}</a>
+            <a href={href} class={active === href ? 'attiva' : ''}>{label}</a>
           ))}
         </nav>
       </div>
@@ -47,12 +44,12 @@ const nav = [
       </div>
     </main>
 
-    <footer class="site-footer">
+    <footer class="piede">
       <div class="wrap">
-        <strong>SO Davoli Ripasso</strong>
+        <strong>Quaderno SO Davoli</strong>
         <p>
-          Materiale didattico non ufficiale. Verifica sempre sul testo completo.
-          Fonti: <a href="https://www.cs.unibo.it/~renzo/so/compiti-so.shtml">archivio ufficiale Davoli</a>.
+          Appunti non ufficiali di studenti, per studenti. Verifica sempre sul testo completo.
+          Fonte primaria: <a href="https://www.cs.unibo.it/~renzo/so/compiti-so.shtml">archivio ufficiale</a>.
         </p>
       </div>
     </footer>

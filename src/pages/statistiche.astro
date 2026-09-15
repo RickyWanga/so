@@ -2,82 +2,64 @@
 import Base from '../layouts/Base.astro';
 import { g1Recent, g1Stats, g2New, g2Stats, g2Top } from '../data/stats.js';
 
+const bar = (v, m) =>
+  `display:block;height:7px;background:var(--rosso);margin-top:3px;min-width:4px;width:${Math.max(2, Math.round((v / m) * 100))}%;`;
 const maxG1 = Math.max(...g1Stats.map((r) => r.total));
 const maxG2 = Math.max(...g2Stats.map((r) => r.total));
-const bar = (v, m) =>
-  `display:block;height:8px;border-radius:4px;background:var(--accent);width:${Math.max(4, Math.round((v / m) * 100))}%;margin-top:4px;`;
 ---
-<Base title="Statistiche" active="/statistiche/">
-  <span class="eyebrow">Statistiche dagli appelli</span>
-  <h1>Cosa esce davvero</h1>
-  <p class="lead">
+<Base title="Numeri dagli appelli" active="/statistiche/">
+  <p class="sovratitolo">Statistiche</p>
+  <h1>Cosa esce davvero.</h1>
+  <p class="sottotitolo">
     G1: 48 appelli 2017-2026. G2: 12 appelli 2024-2026, 4 domande per appello.
-    Clicca un tipo per vedere gli esempi svolti.
+    Ogni riga porta agli esempi svolti.
   </p>
 
-  <section class="block">
-    <div class="panel-box">
-      <span class="eyebrow">G1 2017-2026</span>
-      <h2>Tipi di esercizio per periodo</h2>
-      <div class="table-scroll">
-        <table class="data">
-          <thead><tr><th>Tipo</th><th>17-19</th><th>20-22</th><th>23-24</th><th>25-26</th><th>Tot</th><th></th></tr></thead>
-          <tbody>
-            {g1Stats.map((r) => (
-              <tr>
-                <td><strong>{r.type}</strong><span style={bar(r.total, maxG1)} /></td>
-                <td>{r.p1}</td><td>{r.p2}</td><td>{r.p3}</td><td>{r.p4}</td>
-                <td><strong>{r.total}</strong></td>
-                <td><a href={`/esercizi/?part=${encodeURIComponent(r.link[0])}&topic=${encodeURIComponent(r.link[2])}`}>Esempi →</a></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
+  <h2>G1 per periodo: il rimpiazzamento ha vinto</h2>
+  <div class="tabella-scorre">
+    <table class="dati">
+      <thead><tr><th>Tipo</th><th>17-19</th><th>20-22</th><th>23-24</th><th>25-26</th><th>Tot</th><th></th></tr></thead>
+      <tbody>
+        {g1Stats.map((r) => (
+          <tr>
+            <td><strong>{r.type}</strong><span style={bar(r.total, maxG1)} /></td>
+            <td>{r.p1}</td><td>{r.p2}</td><td>{r.p3}</td><td>{r.p4}</td>
+            <td><strong>{r.total}</strong></td>
+            <td><a href={`/esercizi/?part=${encodeURIComponent(r.link[0])}&topic=${encodeURIComponent(r.link[2])}`}>Esempi →</a></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <div class="marginale"><span class="rubrica">2025-2026</span>
+    <p>{g1Recent.map((r) => `${r.type}: ${r.note}`).join(' · ')}. Tutti gli altri tipi sono spariti.</p>
+  </div>
 
-  <section class="block">
-    <div class="panel-box">
-      <span class="eyebrow">G1 2025-2026</span>
-      <h2>Solo due tipi sopravvivono</h2>
-      <ul class="tight">
-        {g1Recent.map((r) => <li><strong>{r.type}</strong> — {r.note}</li>)}
-      </ul>
-    </div>
-  </section>
+  <h2>G2 per area: file system e sicurezza fanno metà punti</h2>
+  <div class="tabella-scorre">
+    <table class="dati">
+      <thead><tr><th>Area</th><th>2024</th><th>2025</th><th>2026</th><th>Tot</th><th></th></tr></thead>
+      <tbody>
+        {g2Stats.map((r) => (
+          <tr>
+            <td><strong>{r.area}</strong><span style={bar(r.total, maxG2)} /></td>
+            <td>{r.y24}</td><td>{r.y25}</td><td>{r.y26}</td>
+            <td><strong>{r.total}</strong></td>
+            <td><a href={`/g2/?area=${encodeURIComponent(r.link)}`}>Domande →</a></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
 
-  <section class="block">
-    <div class="panel-box">
-      <span class="eyebrow">G2 2024-2026</span>
-      <h2>Domande per area</h2>
-      <p>File system + sicurezza = 54% delle domande recenti.</p>
-      <div class="table-scroll">
-        <table class="data">
-          <thead><tr><th>Area</th><th>2024</th><th>2025</th><th>2026</th><th>Tot</th><th></th></tr></thead>
-          <tbody>
-            {g2Stats.map((r) => (
-              <tr>
-                <td><strong>{r.area}</strong><span style={bar(r.total, maxG2)} /></td>
-                <td>{r.y24}</td><td>{r.y25}</td><td>{r.y26}</td>
-                <td><strong>{r.total}</strong></td>
-                <td><a href={`/g2/?area=${encodeURIComponent(r.link)}`}>Domande →</a></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <section class="block">
-    <div class="panel-box">
-      <span class="eyebrow">G2 sotto osservazione</span>
-      <h2>Top 5 e tipi nuovi</h2>
+  <div class="colonne">
+    <div>
       <h3>Le più frequenti</h3>
-      <ul class="tight">{g2Top.map((x) => <li>{x}</li>)}</ul>
-      <h3>Tipi mai visti prima del 2024</h3>
-      <ul class="tight">{g2New.map((x) => <li>{x}</li>)}</ul>
+      <ul>{g2Top.map((x) => <li>{x}</li>)}</ul>
     </div>
-  </section>
+    <div>
+      <h3>Tipi mai visti prima del 2024</h3>
+      <ul>{g2New.map((x) => <li>{x}</li>)}</ul>
+    </div>
+  </div>
 </Base>

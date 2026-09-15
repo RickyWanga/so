@@ -1,40 +1,35 @@
 ---
 import Base from '../layouts/Base.astro';
 ---
-<Base title="Simulatore" active="/simulatore/">
-  <span class="eyebrow">Laboratorio G1</span>
-  <h1>Simulatore FIFO e LRU</h1>
-  <p class="lead">Usalo per costruire controesempi: FIFO non cambia ordine su hit, LRU aggiorna la recenza a ogni riferimento.</p>
+<Base title="Simulatore FIFO/LRU" active="/simulatore/">
+  <p class="sovratitolo">Laboratorio G1</p>
+  <h1>FIFO contro LRU sulla tua stringa.</h1>
+  <p class="sottotitolo">Costruisci il controesempio: riempi, cambia la recenza con gli hit, inserisci una pagina nuova.</p>
 
-  <div class="filters">
-    <label class="grow">Stringa di riferimenti
+  <div class="filtri">
+    <label class="largo">Stringa di riferimenti
       <input type="text" id="refs" value="1 2 3 4 1 2 3 5 1" />
     </label>
-    <label>Numero di frame
+    <label>Frame
       <input type="number" id="frames" value="4" min="1" max="12" />
     </label>
   </div>
-  <div class="filters" style="margin-top:0.5rem;">
-    <span style="color:var(--muted);font-size:0.85rem;">Preset:</span>
-    <button class="button ghost" type="button" data-preset="1 2 3 4 1 2 3 5 1">FIFO peggio</button>
-    <button class="button ghost" type="button" data-preset="1 2 3 4 5 1 2 3 4 5">Fault ciclici</button>
-    <button class="button ghost" type="button" data-preset="1 2 3 4 1 2 5 1 2 3 4 5">Belady classica</button>
+  <div class="filtri" style="margin-top:0.5rem;border-top:none;padding-top:0;">
+    <span style="color:var(--sbiadito);font-size:0.85rem;">Preset:</span>
+    <button class="pulsante" type="button" data-preset="1 2 3 4 1 2 3 5 1">FIFO peggio</button>
+    <button class="pulsante" type="button" data-preset="1 2 3 4 5 1 2 3 4 5">Fault ciclici</button>
+    <button class="pulsante" type="button" data-preset="1 2 3 4 1 2 5 1 2 3 4 5">Belady classica</button>
   </div>
 
-  <div class="sim-grid" id="out"></div>
+  <div class="griglia-sim" id="out"></div>
 
-  <section class="block">
-    <div class="panel-box">
-      <span class="eyebrow">Ricetta per differenziare FIFO e LRU</span>
-      <h2>Riempi, cambia la recenza, inserisci, richiama.</h2>
-      <ol class="tight">
-        <li>Riempi tutti i frame.</li>
-        <li>Fai hit sulle pagine che vuoi rendere recenti per LRU.</li>
-        <li>Inserisci una pagina nuova: FIFO e LRU devono scegliere vittime diverse.</li>
-        <li>Riferisci la pagina espulsa da FIFO ma conservata da LRU.</li>
-      </ol>
-    </div>
-  </section>
+  <h2>La ricetta in quattro mosse</h2>
+  <div class="passaggi">
+    <div><strong>1</strong><span>Riempi tutti i frame.</span></div>
+    <div><strong>2</strong><span>Fai hit sulle pagine che vuoi rendere recenti per LRU.</span></div>
+    <div><strong>3</strong><span>Inserisci una pagina nuova: FIFO e LRU devono scegliere vittime diverse.</span></div>
+    <div><strong>4</strong><span>Richiama la pagina espulsa da FIFO ma conservata da LRU.</span></div>
+  </div>
 </Base>
 
 <script is:inline>
@@ -81,23 +76,23 @@ import Base from '../layouts/Base.astro';
     const n = Math.min(12, Math.max(1, Number(document.getElementById('frames').value) || 1));
     const out = document.getElementById('out');
     if (!refs.length) {
-      out.innerHTML = '<p class="empty">Inserisci almeno un riferimento valido.</p>';
+      out.innerHTML = '<p class="vuoto">Inserisci almeno un riferimento valido.</p>';
       return;
     }
     out.innerHTML = ['FIFO', 'LRU'].map((algo) => {
       const r = simulate(refs, n, algo);
       const rows = r.steps.map((s) =>
-        '<tr><td>' + (s.index + 1) + '</td><td><strong>' + esc(s.page) + '</strong></td><td><span class="frames">' +
+        '<tr><td>' + (s.index + 1) + '</td><td><strong>' + esc(s.page) + '</strong></td><td><span class="celle">' +
         Array.from({ length: n }, (_, i) =>
-          '<span class="' + (s.frames[i] === s.page ? 'cur' : '') + '">' + (s.frames[i] ?? '-') + '</span>',
+          '<span class="' + (s.frames[i] === s.page ? 'ora' : '') + '">' + (s.frames[i] ?? '-') + '</span>',
         ).join('') +
-        '</span></td><td><span class="chip ' + (s.hit ? 'hit' : 'fault') + '">' + (s.hit ? 'HIT' : 'FAULT') + '</span></td>' +
+        '</span></td><td><span class="gettone ' + (s.hit ? 'hit' : 'fault') + '">' + (s.hit ? 'HIT' : 'FAULT') + '</span></td>' +
         '<td>' + (s.victim ?? '-') + '</td></tr>',
       ).join('');
-      return '<section class="panel-box"><span class="eyebrow">Algoritmo</span><h2>' + algo +
-        ' — <span class="fault-count">' + r.faults + '</span> page fault</h2>' +
-        '<div class="table-scroll"><table class="sim"><thead><tr><th>#</th><th>Ref</th><th>Frame</th><th>Esito</th><th>Vittima</th></tr></thead>' +
-        '<tbody>' + rows + '</tbody></table></div></section>';
+      return '<div class="riquadro"><p class="sovratitolo">' + algo + '</p>' +
+        '<p><span class="conteggio-fault">' + r.faults + '</span> page fault</p>' +
+        '<div class="tabella-scorre"><table class="sim"><thead><tr><th>#</th><th>Ref</th><th>Frame</th><th>Esito</th><th>Vittima</th></tr></thead>' +
+        '<tbody>' + rows + '</tbody></table></div></div>';
     }).join('');
   }
 

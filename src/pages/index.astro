@@ -2,82 +2,76 @@
 import Base from '../layouts/Base.astro';
 import { exercises } from '../data/exercises.js';
 import { g2Questions } from '../data/g2.js';
-import { finalRanking } from '../data/prediction.js';
 
-const focus = exercises.filter((e) => e.focus).slice(0, 6);
-const hot = g2Questions.filter((q) => q.hot).slice(0, 6);
+const count = (part) => exercises.filter((e) => e.part === part).length;
+const tappe = [
+  {
+    n: 'I', part: 'C1', titolo: 'Monitor e rendez-vous',
+    cosa: 'Sincronizzazione tra processi: generazioni, snapshot, risvegli selettivi.',
+    meta: `${count('C1')} esercizi svolti`,
+    href: '/esercizi/?part=C1&topic=Tutti',
+  },
+  {
+    n: 'II', part: 'C2', titolo: 'Semafori e message passing',
+    cosa: 'Testimone, semafori privati, ACK, inbox locali.',
+    meta: `${count('C2')} esercizi svolti`,
+    href: '/esercizi/?part=C2&topic=Tutti',
+  },
+  {
+    n: 'III', part: 'G1', titolo: 'Scheduling e memoria',
+    cosa: 'Gantt, rimpiazzamento pagine, banchiere. La parte più meccanica.',
+    meta: `${count('G1')} esercizi svolti + simulatore`,
+    href: '/esercizi/?part=G1&topic=Tutti',
+  },
+  {
+    n: 'IV', part: 'G2', titolo: 'Domande di teoria',
+    cosa: 'File system, sicurezza, memoria: domanda e risposta in due minuti.',
+    meta: `${g2Questions.length} domande archiviate`,
+    href: '/g2/',
+  },
+];
 ---
-<Base title="Home" active="/">
-  <section class="hero">
-    <div>
-      <span class="eyebrow">Scritto di Sistemi Operativi</span>
-      <h1>Ripasso mirato, senza previsioni magiche.</h1>
-      <p class="lead">
-        Monitor, semafori, message passing, G1 e le domande teoriche del G2:
-        pattern che ritornano, template pronti e statistiche dagli appelli veri.
-      </p>
-      <div class="hero-actions">
-        <a class="button primary" href="/esercizi/">Apri gli esercizi</a>
-        <a class="button" href="/g2/">Vai alle domande G2</a>
-      </div>
-    </div>
-    <div class="panel-box">
-      <span class="eyebrow">Priorità di ripasso</span>
-      {finalRanking.map((row, i) => (
-        <div class="priority-row">
-          <span class="badge part">{row.part}</span>
-          <div><strong>{i + 1}. {row.first}</strong><small>Seconda scelta: {row.second}</small></div>
+<Base title="Il percorso" active="/">
+  <p class="sovratitolo">Scritto di Sistemi Operativi · UniBo</p>
+  <h1>Quattro tappe, nell'ordine in cui conviene studiarle.</h1>
+  <p class="sottotitolo">
+    Ogni tappa ha i suoi esercizi svolti, i template da copiare e una checklist
+    per non perdere punti banali. Parti dalla I e non saltare i prerequisiti.
+  </p>
+
+  <ol class="tappe">
+    {tappe.map((t) => (
+      <li>
+        <span class="tappa-num">{t.n}</span>
+        <div>
+          <h3 style="margin-top:0;">{t.part} — {t.titolo}</h3>
+          <p>{t.cosa}</p>
+          <p>{t.meta} · <a href={t.href}>Entra →</a></p>
         </div>
-      ))}
-      <p><a href="/template/">Vedi template e checklist →</a></p>
-    </div>
-  </section>
+      </li>
+    ))}
+  </ol>
 
-  <section class="block">
-    <span class="eyebrow">Domande calde</span>
-    <h2>G2: le risposte che escono di più</h2>
-    <div class="grid">
-      {hot.map((q) => (
-        <article class="card">
-          <div class="badges"><span class="badge">{q.area}</span></div>
-          <h3>{q.question}</h3>
-          <p>{q.answer.slice(0, 140)}…</p>
-          <p><a href="/g2/">Leggi la risposta →</a></p>
-        </article>
-      ))}
-    </div>
-  </section>
-
-  <section class="block">
-    <span class="eyebrow">Parti da qui</span>
-    <h2>Sei esercizi ad alto rendimento</h2>
-    <div class="grid">
-      {focus.map((e) => (
-        <article class="card">
-          <div class="badges">
-            <span class="badge part">{e.part}</span>
-            <span class="badge">{e.topic}</span>
-          </div>
-          <h3>{e.title}</h3>
-          <p>{e.idea}</p>
-          <p><a href="/esercizi/">Apri soluzione →</a></p>
-        </article>
-      ))}
-    </div>
-  </section>
-
-  <section class="block">
-    <span class="eyebrow">Metodo</span>
-    <h2>Prima l'invariante, poi il codice.</h2>
-    <div class="panel-box">
-      <ol class="tight">
+  <h2>Prima di aprire il quaderno</h2>
+  <div class="colonne" style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+    <div>
+      <h3>Il metodo in cinque domande</h3>
+      <ol>
         <li>Quale stato condiviso descrive il problema?</li>
-        <li>Chi si blocca, su quale condizione o semaforo?</li>
+        <li>Chi si blocca, e su cosa?</li>
         <li>Quale evento rende vera la guardia?</li>
-        <li>Chi passa il testimone o apre la fase successiva?</li>
-        <li>Un nuovo arrivato può mescolarsi al gruppo vecchio?</li>
+        <li>Chi passa il testimone?</li>
+        <li>Un nuovo arrivato può mescolarsi ai vecchi?</li>
       </ol>
       <p><a href="/template/">Tutti i pattern e i template →</a></p>
     </div>
-  </section>
+    <div>
+      <h3>Dove guardare i numeri</h3>
+      <p>48 appelli G1 e 12 appelli G2 spogliati per tipo, periodo e frequenza.</p>
+      <p><a href="/statistiche/">Le statistiche →</a></p>
+      <h3>Allenati sul simulatore</h3>
+      <p>FIFO contro LRU sulla tua stringa, passo passo.</p>
+      <p><a href="/simulatore/">Apri il simulatore →</a></p>
+    </div>
+  </div>
 </Base>

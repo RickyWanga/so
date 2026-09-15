@@ -36,75 +36,68 @@ const checklist = [
   { title: 'Ultimi dieci minuti', items: ['Inizializzazioni di semafori e contatori.', 'Segni <, <=, >, >= nelle guardie.', 'Processi che potrebbero restare bloccati.', 'Reset della generazione precedente.', 'Numero di page fault e vittime motivate.'] },
 ];
 ---
-<Base title="Template e metodo" active="/template/">
-  <span class="eyebrow">Metodo</span>
-  <h1>Riconosci, applica, verifica</h1>
-  <p class="lead">Prima il pattern, poi il template di codice, infine la checklist prima di consegnare.</p>
+<Base title="Metodo e template" active="/template/">
+  <p class="sovratitolo">Come si studia</p>
+  <h1>Riconosci, applica, verifica.</h1>
+  <p class="sottotitolo">Il pattern dice cosa guardare, il template dà il codice da adattare, la checklist ferma gli errori prima della consegna.</p>
 
+  <h2><span class="numero-cap">1</span>Riconosci il pattern</h2>
   {patternGroups.map((group) => (
-    <section class="block">
-      <h2>{group.label}</h2>
-      <div class="grid">
-        {group.patterns.map((p) => (
-          <article class="card">
+    <>
+      <h3>{group.label} <span style="color:var(--sbiadito);font-weight:400;">· {group.patterns.length} pattern</span></h3>
+      {group.patterns.map((p) => (
+        <details class="scheda">
+          <summary>
             <h3>{p.name}</h3>
-            <p><strong>Riconoscilo — </strong>{p.trigger}</p>
-            <p><strong>Ricetta — </strong>{p.recipe}</p>
+            <p class="testo-domanda"><strong>Si riconosce da — </strong>{p.trigger}</p>
+            <span class="apri">Ricetta e controlli</span>
+          </summary>
+          <div class="corpo">
+            <div class="marginale"><span class="rubrica">Ricetta</span><p>{p.recipe}</p></div>
             <p>{p.checks.join(' · ')}</p>
             {patternLinks[p.name] && (
-              <p><a href={exLink(...patternLinks[p.name])}>Vedi esempi svolti →</a></p>
+              <p><a href={exLink(...patternLinks[p.name])}>Vedi gli esempi svolti →</a></p>
             )}
-          </article>
-        ))}
-      </div>
-    </section>
+          </div>
+        </details>
+      ))}
+    </>
   ))}
 
+  <h2><span class="numero-cap">2</span>Applica il template</h2>
   {templateParts.map((part) => (
-    <section class="block">
-      <span class="eyebrow">Template di codice</span>
-      <h2>{part}</h2>
+    <>
+      <h3>{part}</h3>
       {templates.filter((t) => t.part === part).map((t) => (
-        <details class="card" style="margin-top: 0.75rem;">
-          <summary><h3>{t.title}</h3><span class="open-hint">Codice</span></summary>
-          <div class="card-body">
-            {t.intro && <p><strong>Regola — </strong>{t.intro}</p>}
+        <details class="scheda">
+          <summary><h3>{t.title}</h3><span class="apri">Codice</span></summary>
+          <div class="corpo">
+            {t.intro && <div class="marginale"><span class="rubrica">Regola</span><p>{t.intro}</p></div>}
             {t.code && <pre><code>{t.code}</code></pre>}
           </div>
         </details>
       ))}
-    </section>
+    </>
   ))}
 
-  <section class="block">
-    <span class="eyebrow">Controllo finale</span>
-    <h2>Checklist prima di consegnare</h2>
-    <div class="check-grid">
-      {checklist.map((s) => (
-        <article class="card">
-          <h3>{s.title}</h3>
-          {s.items.map((item) => (
-            <label style="display:flex;gap:0.5rem;align-items:flex-start;padding:0.3rem 0;font-size:0.93rem;">
-              <input type="checkbox" style="margin-top:0.3rem;" />
-              <span>{item}</span>
-            </label>
-          ))}
-        </article>
-      ))}
-    </div>
-  </section>
-
-  <section class="block">
-    <div class="panel-box">
-      <span class="eyebrow">Ordine consigliato</span>
-      <h2>C1 solido, poi punti in G, quindi C2.</h2>
-      <div class="steps">
-        <div><strong>1</strong><span>Leggi tutto e riconosci i pattern.</span></div>
-        <div><strong>2</strong><span>Metti al sicuro C1, la parte più stabile.</span></div>
-        <div><strong>3</strong><span>Avvia G1 o la parte generale più lineare.</span></div>
-        <div><strong>4</strong><span>Affronta C2 con invariante e testimone espliciti.</span></div>
-        <div><strong>5</strong><span>Lascia il 10-15% del tempo alla verifica.</span></div>
+  <h2><span class="numero-cap">3</span>Verifica prima di consegnare</h2>
+  <div class="spalti">
+    {checklist.map((s) => (
+      <div class="riquadro">
+        <h3>{s.title}</h3>
+        {s.items.map((item) => (
+          <label><input type="checkbox" /><span>{item}</span></label>
+        ))}
       </div>
-    </div>
-  </section>
+    ))}
+  </div>
+
+  <h2>Ordine consigliato allo scritto</h2>
+  <div class="passaggi">
+    <div><strong>1</strong><span>Leggi tutto e riconosci i pattern.</span></div>
+    <div><strong>2</strong><span>Metti al sicuro C1, la parte più stabile.</span></div>
+    <div><strong>3</strong><span>Avvia G1 o la parte generale più lineare.</span></div>
+    <div><strong>4</strong><span>Affronta C2 con invariante e testimone espliciti.</span></div>
+    <div><strong>5</strong><span>Lascia il 10-15% del tempo alla verifica.</span></div>
+  </div>
 </Base>
