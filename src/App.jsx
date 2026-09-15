@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { exercises, parts, topics } from './data/exercises.js'
 import { g2Areas, g2Questions } from './data/g2.js'
+import { templates } from './data/templates.js'
 import {
   finalRanking,
-  forecasts,
   recentOfficialExams,
   reportedJune2026,
   summerPairs,
@@ -12,13 +12,11 @@ import { patternGroups } from './data/patterns.js'
 
 const navItems = [
   ['home', 'Home'],
-  ['prediction', 'Previsione'],
-  ['patterns', 'Pattern'],
   ['exercises', 'Esercizi'],
   ['g2', 'G2'],
+  ['template', 'Template'],
   ['simulator', 'Simulatore'],
   ['archive', 'Archivio'],
-  ['checklist', 'Checklist'],
 ]
 
 const officialArchiveUrl = 'https://www.cs.unibo.it/~renzo/so/compiti-so.shtml'
@@ -83,13 +81,11 @@ function App() {
 
       <main>
         {activePage === 'home' && <HomePage navigate={navigate} />}
-        {activePage === 'prediction' && <PredictionPage />}
-        {activePage === 'patterns' && <PatternsPage navigate={navigate} />}
         {activePage === 'exercises' && <ExercisesPage />}
         {activePage === 'g2' && <G2Page />}
+        {activePage === 'template' && <TemplatePage navigate={navigate} />}
         {activePage === 'simulator' && <SimulatorPage />}
         {activePage === 'archive' && <ArchivePage />}
-        {activePage === 'checklist' && <ChecklistPage />}
       </main>
 
       <footer className="footer">
@@ -124,13 +120,9 @@ function HomePage({ navigate }) {
             <button className="button primary" type="button" onClick={() => navigate('exercises')}>
               Apri gli esercizi
             </button>
-            <button className="button secondary" type="button" onClick={() => navigate('prediction')}>
-              Controlla la previsione
+            <button className="button secondary" type="button" onClick={() => navigate('g2')}>
+              Vai alle domande G2
             </button>
-          </div>
-          <div className="hero-note">
-            <strong>Nota:</strong> al 20 luglio 2026 l archivio ufficiale arriva al 6 febbraio 2026.
-            Il compito di giugno 2026 e quindi trattato come segnalazione, non come fonte ufficiale.
           </div>
         </div>
 
@@ -145,21 +137,35 @@ function HomePage({ navigate }) {
               </div>
             </div>
           ))}
-          <button className="text-link" type="button" onClick={() => navigate('checklist')}>
-            Vedi la checklist da esame <span aria-hidden="true">-&gt;</span>
+          <button className="text-link" type="button" onClick={() => navigate('template')}>
+            Vedi template e checklist <span aria-hidden="true">-&gt;</span>
           </button>
         </div>
       </section>
 
       <section className="page-width section-block">
         <SectionHeader
-          eyebrow="Verdetto aggiornato"
-          title="La tua analisi e utile, ma va resa meno categorica"
-          description="Tre correzioni che cambiano come distribuire il tempo di studio."
+          eyebrow="Domande calde"
+          title="G2: le risposte che escono di più"
+          description="File system e sicurezza fanno metà dei punti. Studiale a flash."
+          action={
+            <button className="button ghost" type="button" onClick={() => navigate('g2')}>
+              Tutte le domande G2
+            </button>
+          }
         />
-        <div className="forecast-grid compact">
-          {forecasts.map((forecast) => (
-            <ForecastCard forecast={forecast} key={forecast.part} compact />
+        <div className="exercise-preview-grid">
+          {g2Questions.filter((item) => item.hot).slice(0, 6).map((item) => (
+            <article className="preview-card" key={item.id}>
+              <div className="card-topline">
+                <span className="topic-badge">{item.area}</span>
+              </div>
+              <h3>{item.question}</h3>
+              <p>{item.answer.slice(0, 140)}…</p>
+              <button className="text-link" type="button" onClick={() => navigate('g2')}>
+                Leggi la risposta <span aria-hidden="true">-&gt;</span>
+              </button>
+            </article>
           ))}
         </div>
       </section>
@@ -217,122 +223,6 @@ function HomePage({ navigate }) {
   )
 }
 
-function PredictionPage() {
-  return (
-    <div className="page-width page-stack">
-      <SectionHeader
-        eyebrow="Previsione luglio 2026"
-        title="Conferma parziale: buona direzione, confidenza da ridurre"
-        description="La tabella ufficiale sostiene soprattutto G1. Su C1 e C2 esistono tendenze, non regole di alternanza."
-      />
-
-      <div className="source-warning">
-        <div className="warning-icon">!</div>
-        <div>
-          <strong>Il giugno 2026 non e ancora nell archivio ufficiale.</strong>
-          <p>
-            Dati usati come segnalazione: C1 {reportedJune2026.c1}; C2 {reportedJune2026.c2};
-            G1 {reportedJune2026.g1}. Le conclusioni dipendono dalla correttezza di questa descrizione.
-          </p>
-        </div>
-      </div>
-
-      <div className="forecast-grid">
-        {forecasts.map((forecast) => (
-          <ForecastCard forecast={forecast} key={forecast.part} />
-        ))}
-      </div>
-
-      <section className="panel section-panel">
-        <div className="panel-heading">
-          <div>
-            <span className="eyebrow">Ranking operativo</span>
-            <h2>Cosa preparare in ordine</h2>
-          </div>
-        </div>
-        <div className="ranking-table">
-          <div className="ranking-head">
-            <span>Parte</span><span>Prima scelta</span><span>Seconda scelta</span><span>Non eliminare</span>
-          </div>
-          {finalRanking.map((row) => (
-            <div className="ranking-row" key={row.part}>
-              <span className={`part-badge part-${row.part.toLowerCase()}`}>{row.part}</span>
-              <strong>{row.first}</strong>
-              <span>{row.second}</span>
-              <span>{row.doNotDrop}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="panel section-panel">
-        <div className="panel-heading split-heading">
-          <div>
-            <span className="eyebrow">Evidenza</span>
-            <h2>Confronto giugno-luglio, 2017-2025</h2>
-            <p>Solo compiti scritti ufficiali; G2 escluso.</p>
-          </div>
-          <a className="button ghost" href={officialArchiveUrl} target="_blank" rel="noreferrer">
-            Archivio Davoli
-          </a>
-        </div>
-        <SummerTable />
-      </section>
-
-      <section className="logic-grid">
-        <article className="logic-card positive">
-          <span>Segnale robusto</span>
-          <h3>G1 cambia categoria in 8 coppie su 8</h3>
-          <p>
-            Nel campione considerato luglio non ripete la categoria principale di giugno.
-            Dopo un G1 sulle pagine, scheduling diventa la prima preparazione sensata.
-          </p>
-        </article>
-        <article className="logic-card neutral">
-          <span>Segnale moderato</span>
-          <h3>C2 message passing compare in 5 luglio su 8</h3>
-          <p>
-            E il singolo esito piu frequente, ma l alternanza giugno-luglio non e affidabile:
-            in alcuni anni il paradigma si ripete.
-          </p>
-        </article>
-        <article className="logic-card caution">
-          <span>Segnale debole</span>
-          <h3>C1 non rispetta categorie nette</h3>
-          <p>
-            Scenari, rendez-vous, buffer e risvegli selettivi si sovrappongono. Meglio studiare
-            i meccanismi trasversali invece di escludere intere famiglie.
-          </p>
-        </article>
-      </section>
-    </div>
-  )
-}
-
-function ForecastCard({ forecast, compact = false }) {
-  return (
-    <article className={`forecast-card ${compact ? 'forecast-compact' : ''}`}>
-      <div className="forecast-header">
-        <span className={`part-badge part-${forecast.part.toLowerCase()}`}>{forecast.part}</span>
-        <span className="confidence">Confidenza {forecast.confidence.toLowerCase()}</span>
-      </div>
-      <h3>{forecast.primary}</h3>
-      <p>{forecast.verdict}</p>
-      {!compact && (
-        <>
-          <div className="forecast-subline"><strong>Seconda scelta:</strong> {forecast.secondary}</div>
-          <ul className="clean-list">
-            {forecast.evidence.map((item) => <li key={item}>{item}</li>)}
-          </ul>
-          <div className="tag-row">
-            {forecast.focus.map((item) => <span className="tag" key={item}>{item}</span>)}
-          </div>
-        </>
-      )}
-    </article>
-  )
-}
-
 function SummerTable() {
   return (
     <div className="table-scroll">
@@ -381,14 +271,73 @@ function SourceCell({ text, url }) {
   )
 }
 
-function PatternsPage({ navigate }) {
+function TemplatePage({ navigate }) {
+  const templateParts = ['C1 — Monitor', 'C2 — Semafori', 'C2 — Message Passing', 'G1 — Scheduling']
+  const checklistSections = [
+    {
+      title: 'Prima di scrivere C1/C2',
+      items: [
+        'Elenca attori e classi di attesa.',
+        'Scrivi stato condiviso e invariante.',
+        'Associa ogni wait/P a chi puo sbloccarla.',
+        'Decidi come separare generazioni e nuovi arrivi.',
+      ],
+    },
+    {
+      title: 'Semafori',
+      items: [
+        'Ogni V ha un destinatario concettuale preciso.',
+        'Durante il testimone il mutex resta chiuso.',
+        'L ultimo processo riapre il cancello.',
+        'Nessun segnale rimane accumulato per errore.',
+        'Se servono scelte precise, usa classi o semafori privati.',
+      ],
+    },
+    {
+      title: 'Monitor',
+      items: [
+        'Ragiona con condition signal-urgent.',
+        'Aggiorna lo stato prima del signal.',
+        'Congela il risultato prima di risvegliare un gruppo.',
+        'Verifica che il monitor sia riutilizzabile.',
+      ],
+    },
+    {
+      title: 'Message passing',
+      items: [
+        'Messaggi con sender, tag e sequence quando necessario.',
+        'Nessun messaggio non richiesto viene perso.',
+        'ACK inviato nel momento semantico corretto.',
+        'ANY e FIFO per mittente sono preservati.',
+      ],
+    },
+    {
+      title: 'G1 scheduling',
+      items: [
+        'Disegna CPU, ogni unita I/O e ready queue separatamente.',
+        'Registra arrivi, fine burst, fine I/O, quanto e preemption.',
+        'Dichiara la regola per eventi simultanei.',
+        'Controlla la somma dei burst di ogni processo.',
+      ],
+    },
+    {
+      title: 'Ultimi dieci minuti',
+      items: [
+        'Inizializzazioni di semafori e contatori.',
+        'Segni <, <=, >, >= nelle guardie.',
+        'Processi che potrebbero restare bloccati.',
+        'Reset della generazione precedente.',
+        'Numero di page fault e vittime motivate.',
+      ],
+    },
+  ]
+
   return (
     <div className="page-width page-stack">
       <SectionHeader
-        eyebrow="Pattern recognition"
-        title="Pochi meccanismi, combinati in molti modi"
-        description="Leggi il trigger, scrivi la ricetta a parole e soltanto dopo passa al codice."
-        action={<button className="button ghost" type="button" onClick={() => navigate('exercises')}>Vai agli esercizi</button>}
+        eyebrow="Metodo"
+        title="Riconosci, applica, verifica"
+        description="Prima il pattern, poi il template di codice, infine la checklist prima di consegnare."
       />
 
       <div className="pattern-groups">
@@ -420,18 +369,63 @@ function PatternsPage({ navigate }) {
         ))}
       </div>
 
-      <section className="panel derivation-panel">
-        <div>
-          <span className="eyebrow">Schema universale</span>
-          <h2>Sette righe prima di ogni C1 o C2</h2>
+      {templateParts.map((part) => (
+        <section key={part}>
+          <SectionHeader eyebrow="Template di codice" title={part} />
+          <div className="exercise-list">
+            {templates.filter((item) => item.part === part).map((item) => (
+              <details className="exercise-card" id={item.id} key={item.id}>
+                <summary>
+                  <div className="exercise-summary-main">
+                    <h2>{item.title}</h2>
+                  </div>
+                  <div className="exercise-summary-side">
+                    <span className="details-label">Codice</span>
+                  </div>
+                </summary>
+                <div className="exercise-body">
+                  {item.intro && (
+                    <div className="idea-box">
+                      <span>Regola</span>
+                      <p>{item.intro}</p>
+                    </div>
+                  )}
+                  {item.code && <CodeBlock code={item.code} />}
+                </div>
+              </details>
+            ))}
+          </div>
+        </section>
+      ))}
+
+      <SectionHeader
+        eyebrow="Controllo finale"
+        title="Checklist prima di consegnare"
+        description="Non serve ricordare piu codice: serve intercettare gli errori che trasformano una buona idea in deadlock o starvation."
+      />
+      <div className="checklist-grid">
+        {checklistSections.map((section) => (
+          <article className="checklist-card" key={section.title}>
+            <h2>{section.title}</h2>
+            {section.items.map((item) => (
+              <label key={item}>
+                <input type="checkbox" />
+                <span>{item}</span>
+              </label>
+            ))}
+          </article>
+        ))}
+      </div>
+      <section className="exam-order panel">
+        <span className="eyebrow">Ordine consigliato</span>
+        <h2>C1 solido, poi punti in G, quindi C2.</h2>
+        <div className="exam-order-steps">
+          <div><strong>1</strong><span>Leggi tutto e riconosci i pattern.</span></div>
+          <div><strong>2</strong><span>Metti al sicuro C1, la parte piu stabile.</span></div>
+          <div><strong>3</strong><span>Avvia G1 o la parte generale piu lineare.</span></div>
+          <div><strong>4</strong><span>Affronta C2 con invariante e testimone espliciti.</span></div>
+          <div><strong>5</strong><span>Lascia il 10-15% del tempo alla verifica.</span></div>
         </div>
-        <pre>{`1. Processi / attori:
-2. Stato condiviso:
-3. Invariante:
-4. Classi di processi in attesa:
-5. Guardia di ciascuna classe:
-6. Operazione che rende vera la guardia:
-7. Chi apre la generazione o passa il testimone:`}</pre>
       </section>
     </div>
   )
@@ -492,7 +486,7 @@ function ExercisesPage() {
         </label>
         <label className="toggle-label">
           <input type="checkbox" checked={focusOnly} onChange={(event) => setFocusOnly(event.target.checked)} />
-          <span>Solo focus luglio</span>
+          <span>Solo focus</span>
         </label>
       </div>
 
@@ -865,7 +859,7 @@ function ArchivePage() {
       <SectionHeader
         eyebrow="Fonti"
         title="Archivio dei compiti scritti usati nel sito"
-        description="Nessuna prova pratica. Il sito considera soltanto C1, C2 e G1; G2 e escluso intenzionalmente."
+        description="Esercizi C1/C2/G1 e domande G2, con rimandi ai PDF ufficiali quando disponibili."
         action={<a className="button primary" href={officialArchiveUrl} target="_blank" rel="noreferrer">Apri archivio ufficiale</a>}
       />
 
@@ -914,103 +908,8 @@ function ArchivePage() {
         <article>
           <span className="source-type caution">Segnalato</span>
           <h3>Giugno 2026</h3>
-          <p>Contenuti riportati dallo studente, in attesa del PDF ufficiale.</p>
+          <p>Contenuti ricostruiti, in attesa del PDF ufficiale.</p>
         </article>
-      </section>
-    </div>
-  )
-}
-
-function ChecklistPage() {
-  const sections = [
-    {
-      title: 'Prima di scrivere C1/C2',
-      items: [
-        'Elenca attori e classi di attesa.',
-        'Scrivi stato condiviso e invariante.',
-        'Associa ogni wait/P a chi puo sbloccarla.',
-        'Decidi come separare generazioni e nuovi arrivi.',
-      ],
-    },
-    {
-      title: 'Semafori',
-      items: [
-        'Ogni V ha un destinatario concettuale preciso.',
-        'Durante il testimone il mutex resta chiuso.',
-        'L ultimo processo riapre il cancello.',
-        'Nessun segnale rimane accumulato per errore.',
-        'Se servono scelte precise, usa classi o semafori privati.',
-      ],
-    },
-    {
-      title: 'Monitor',
-      items: [
-        'Ragiona con condition signal-urgent.',
-        'Aggiorna lo stato prima del signal.',
-        'Congela il risultato prima di risvegliare un gruppo.',
-        'Verifica che il monitor sia riutilizzabile.',
-      ],
-    },
-    {
-      title: 'Message passing',
-      items: [
-        'Messaggi con sender, tag e sequence quando necessario.',
-        'Nessun messaggio non richiesto viene perso.',
-        'ACK inviato nel momento semantico corretto.',
-        'ANY e FIFO per mittente sono preservati.',
-      ],
-    },
-    {
-      title: 'G1 scheduling',
-      items: [
-        'Disegna CPU, ogni unita I/O e ready queue separatamente.',
-        'Registra arrivi, fine burst, fine I/O, quanto e preemption.',
-        'Dichiara la regola per eventi simultanei.',
-        'Controlla la somma dei burst di ogni processo.',
-      ],
-    },
-    {
-      title: 'Ultimi dieci minuti',
-      items: [
-        'Inizializzazioni di semafori e contatori.',
-        'Segni <, <=, >, >= nelle guardie.',
-        'Processi che potrebbero restare bloccati.',
-        'Reset della generazione precedente.',
-        'Numero di page fault e vittime motivate.',
-      ],
-    },
-  ]
-
-  return (
-    <div className="page-width page-stack">
-      <SectionHeader
-        eyebrow="Controllo finale"
-        title="Checklist da usare nelle simulazioni e allo scritto"
-        description="Non serve ricordare piu codice: serve intercettare gli errori che trasformano una buona idea in deadlock o starvation."
-      />
-      <div className="checklist-grid">
-        {sections.map((section) => (
-          <article className="checklist-card" key={section.title}>
-            <h2>{section.title}</h2>
-            {section.items.map((item) => (
-              <label key={item}>
-                <input type="checkbox" />
-                <span>{item}</span>
-              </label>
-            ))}
-          </article>
-        ))}
-      </div>
-      <section className="exam-order panel">
-        <span className="eyebrow">Ordine consigliato</span>
-        <h2>C1 solido, poi punti in G, quindi C2.</h2>
-        <div className="exam-order-steps">
-          <div><strong>1</strong><span>Leggi tutto e riconosci i pattern.</span></div>
-          <div><strong>2</strong><span>Metti al sicuro C1, la parte piu stabile.</span></div>
-          <div><strong>3</strong><span>Avvia G1 o la parte generale piu lineare.</span></div>
-          <div><strong>4</strong><span>Affronta C2 con invariante e testimone espliciti.</span></div>
-          <div><strong>5</strong><span>Lascia il 10-15% del tempo alla verifica.</span></div>
-        </div>
       </section>
     </div>
   )
