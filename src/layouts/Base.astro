@@ -20,16 +20,16 @@ const nav = [
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Quaderno di ripasso per lo scritto di Sistemi Operativi di Renzo Davoli: C1, C2, G1 e domande G2."
+      content="Ripasso per lo scritto di Sistemi Operativi di Renzo Davoli: C1, C2, G1 e domande G2."
     />
     <meta name="theme-color" content="#ffffff" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <title>{title} — Quaderno SO Davoli</title>
+    <title>{title} — Sistemi Operativi</title>
   </head>
   <body>
     <header class="masthead">
       <div class="wrap">
-        <a class="titolo" href="/">Quaderno <em>SO</em> Davoli</a>
+        <a class="titolo" href="/">Sistemi <em>Operativi</em></a>
         <nav>
           {nav.map(([href, label]) => (
             <a href={href} class={active === href ? 'attiva' : ''}>{label}</a>
@@ -46,7 +46,7 @@ const nav = [
 
     <footer class="piede">
       <div class="wrap">
-        <strong>Quaderno SO Davoli</strong>
+        <strong>Sistemi Operativi</strong>
         <p>
           Appunti non ufficiali di studenti, per studenti. Verifica sempre sul testo completo.
           Fonte primaria: <a href="https://www.cs.unibo.it/~renzo/so/compiti-so.shtml">archivio ufficiale</a>.
