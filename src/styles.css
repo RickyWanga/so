@@ -1030,6 +1030,27 @@ a {
   font-size: 0.82rem;
 }
 
+.result-line .link-notice {
+  margin-left: 12px;
+  color: var(--blue);
+  border: 1px solid var(--blue);
+  border-radius: 999px;
+  padding: 2px 6px 2px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.result-line .link-notice button {
+  border: 1px solid var(--blue);
+  background: transparent;
+  color: var(--blue);
+  border-radius: 999px;
+  padding: 1px 10px;
+  cursor: pointer;
+  font-size: 0.78rem;
+}
+
 .exercise-list {
   display: flex;
   flex-direction: column;

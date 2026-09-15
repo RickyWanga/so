@@ -489,6 +489,19 @@ function ExercisesPage({ initialPart, initialTopic }) {
     initialTopic && topics.includes(initialTopic) ? initialTopic : 'Tutti',
   )
   const [focusOnly, setFocusOnly] = useState(false)
+  const [linkNotice, setLinkNotice] = useState(
+    initialPart || initialTopic
+      ? `Filtro da link: ${initialPart || 'Tutte'} · ${initialTopic || 'Tutti'}`
+      : null,
+  )
+
+  function resetFilters() {
+    setQuery('')
+    setPart('Tutte')
+    setTopic('Tutti')
+    setFocusOnly(false)
+    setLinkNotice(null)
+  }
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase()
@@ -546,6 +559,12 @@ function ExercisesPage({ initialPart, initialTopic }) {
       <div className="result-line">
         <strong>{filtered.length}</strong> esercizi trovati
         <span>{exercises.length} totali</span>
+        {linkNotice && (
+          <span className="link-notice">
+            {linkNotice}
+            <button type="button" onClick={resetFilters}>Azzera</button>
+          </span>
+        )}
       </div>
 
       <div className="exercise-list">
