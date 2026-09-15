@@ -89,7 +89,7 @@ a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
 .numero-cap {
   display: inline-block; font-size: 0.85rem; font-weight: 700;
-  background: var(--text); color: #fff; border-radius: 6px;
+  background: var(--accent); color: #fff; border-radius: 6px;
   padding: 0.1em 0.5em; margin-right: 0.5rem; vertical-align: 1px;
 }
 
@@ -111,8 +111,8 @@ a:hover { text-decoration: underline; }
   border: 1px solid var(--border); background: var(--bg); color: var(--text);
 }
 .pulsante:hover { border-color: var(--text); text-decoration: none; }
-.pulsante.primo { background: var(--text); border-color: var(--text); color: #fff; }
-.pulsante.primo:hover { background: #000; color: #fff; }
+.pulsante.primo { background: var(--accent); border-color: var(--accent); color: #fff; }
+.pulsante.primo:hover { background: var(--accent); border-color: var(--accent); color: #fff; filter: brightness(1.12); }
 
 /* ---------- schede ---------- */
 .filtri {
@@ -154,7 +154,7 @@ a:hover { text-decoration: underline; }
   border: 1px solid var(--border);
 }
 .etichetta.calda { color: #fff; background: var(--bad); border-color: var(--bad); }
-.etichetta.parte { color: #fff; background: var(--text); border-color: var(--text); }
+.etichetta.parte { color: #fff; background: var(--accent); border-color: var(--accent); }
 .fonte { color: var(--muted); font-size: 0.84rem; margin: 0.55rem 0; }
 .diag { display: grid; gap: 0.7rem; margin: 0.7rem 0; }
 .diag img { width: 100%; border: 1px solid var(--border); border-radius: 6px; background: #fff; }

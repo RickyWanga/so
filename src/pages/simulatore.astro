@@ -1,11 +1,14 @@
 ---
 import Base from '../layouts/Base.astro';
----
-<Base title="Simulatore FIFO/LRU" active="/simulatore/">
-  <p class="sovratitolo">Laboratorio G1</p>
-  <h1>FIFO contro LRU sulla tua stringa.</h1>
-  <p class="sottotitolo">Costruisci il controesempio: riempi, cambia la recenza con gli hit, inserisci una pagina nuova.</p>
 
+const COLORS = ['#bfdbfe', '#bbf7d0', '#fde68a', '#fbcfe8', '#ddd6fc', '#a5f3fc', '#fecaca'];
+---
+<Base title="Simulatori" active="/simulatore/">
+  <p class="sovratitolo">Laboratorio G1</p>
+  <h1>Simula, non fidarti della memoria.</h1>
+  <p class="sottotitolo">Rimpiazzamento pagine in orizzontale come sui fogli d'esame, e Gantt Round Robin con I/O.</p>
+
+  <h2>Pagine: FIFO, LRU e MIN</h2>
   <div class="filtri">
     <label class="largo">Stringa di riferimenti
       <input type="text" id="refs" value="1 2 3 4 1 2 3 5 1" />
@@ -15,94 +18,262 @@ import Base from '../layouts/Base.astro';
     </label>
   </div>
   <div class="filtri" style="margin-top:0.5rem;border-top:none;padding-top:0;">
-    <span style="color:var(--sbiadito);font-size:0.85rem;">Preset:</span>
+    <span style="color:var(--muted);font-size:0.85rem;">Preset:</span>
     <button class="pulsante" type="button" data-preset="1 2 3 4 1 2 3 5 1">FIFO peggio</button>
     <button class="pulsante" type="button" data-preset="1 2 3 4 5 1 2 3 4 5">Fault ciclici</button>
     <button class="pulsante" type="button" data-preset="1 2 3 4 1 2 5 1 2 3 4 5">Belady classica</button>
   </div>
 
-  <div class="griglia-sim" id="out"></div>
+  <div id="out-pagine"></div>
 
-  <h2>La ricetta in quattro mosse</h2>
-  <div class="passaggi">
-    <div><strong>1</strong><span>Riempi tutti i frame.</span></div>
-    <div><strong>2</strong><span>Fai hit sulle pagine che vuoi rendere recenti per LRU.</span></div>
-    <div><strong>3</strong><span>Inserisci una pagina nuova: FIFO e LRU devono scegliere vittime diverse.</span></div>
-    <div><strong>4</strong><span>Richiama la pagina espulsa da FIFO ma conservata da LRU.</span></div>
+  <div class="marginale"><span class="rubrica">Ricetta</span>
+    <p>Riempi, cambia la recenza con gli hit, inserisci una pagina nuova. MIN guarda il futuro (vittima = prossimo uso più lontano), quindi è ottimo ma irrealizzabile.</p>
   </div>
+
+  <h2>Scheduling: Round Robin con I/O</h2>
+  <p class="sottotitolo">Burst scritti come CPU/I-O/CPU/… (es. <code>4/2/4</code>). Una CPU, una I/O in FIFO, tutti i tempi interi.</p>
+  <div class="filtri">
+    <label>Quanto
+      <input type="number" id="q" value="2" min="1" max="20" />
+    </label>
+    <button class="pulsante" type="button" id="add-proc">+ Processo</button>
+  </div>
+  <div class="tabella-scorre">
+    <table class="dati" id="proc-table">
+      <thead><tr><th>Proc</th><th>Arrivo</th><th>Burst CPU/I-O/…</th><th></th></tr></thead>
+      <tbody id="proc-body"></tbody>
+    </table>
+  </div>
+  <div id="out-sched"></div>
 </Base>
 
 <script is:inline>
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const COLORS = ['#bfdbfe', '#bbf7d0', '#fde68a', '#fbcfe8', '#ddd6fc', '#a5f3fc', '#fecaca'];
+  const TEXTCOLOR = '#16213a';
 
-  function simulate(references, frameCount, algorithm) {
+  /* ---------- rimpiazzamento ---------- */
+  function nextAfter(refs, page, from) {
+    for (let j = from + 1; j < refs.length; j++) if (refs[j] === page) return j;
+    return Infinity;
+  }
+
+  function simulate(refs, n, algo) {
     const frames = [];
-    const fifoQueue = [];
+    const queue = [];
     const lastUsed = new Map();
     const steps = [];
     let faults = 0;
-    references.forEach((page, index) => {
+    refs.forEach((page, i) => {
       const hit = frames.includes(page);
       let victim = null;
       if (!hit) {
         faults++;
-        if (frames.length < frameCount) {
+        if (frames.length < n) {
           frames.push(page);
-          if (algorithm === 'FIFO') fifoQueue.push(page);
-        } else if (algorithm === 'FIFO') {
-          victim = fifoQueue.shift();
+          if (algo === 'FIFO') queue.push(page);
+        } else if (algo === 'FIFO') {
+          victim = queue.shift();
           frames[frames.indexOf(victim)] = page;
-          fifoQueue.push(page);
-        } else {
-          victim = frames.reduce((least, candidate) => {
-            const lt = lastUsed.get(least) ?? -1;
-            const ct = lastUsed.get(candidate) ?? -1;
-            return ct < lt ? candidate : least;
-          }, frames[0]);
+          queue.push(page);
+        } else if (algo === 'LRU') {
+          victim = frames.reduce((a, b) =>
+            (lastUsed.get(b) ?? -1) < (lastUsed.get(a) ?? -1) ? b : a, frames[0]);
           frames[frames.indexOf(victim)] = page;
           lastUsed.delete(victim);
+        } else {
+          victim = frames.reduce((a, b) =>
+            nextAfter(refs, b, i) > nextAfter(refs, a, i) ? b : a, frames[0]);
+          frames[frames.indexOf(victim)] = page;
         }
       }
-      if (algorithm === 'LRU') lastUsed.set(page, index);
-      steps.push({ index, page, hit, victim, frames: frames.slice() });
+      if (algo === 'LRU') lastUsed.set(page, i);
+      steps.push({ i, page, hit, victim, frames: frames.slice() });
     });
-    return { algorithm, faults, steps };
+    return { algo, faults, steps };
   }
 
-  function render() {
+  function renderPagine() {
     const refs = document.getElementById('refs').value
       .split(/[\s,;]+/).map((x) => x.trim()).filter(Boolean)
       .map(Number).filter((x) => Number.isFinite(x));
     const n = Math.min(12, Math.max(1, Number(document.getElementById('frames').value) || 1));
-    const out = document.getElementById('out');
+    const out = document.getElementById('out-pagine');
     if (!refs.length) {
       out.innerHTML = '<p class="vuoto">Inserisci almeno un riferimento valido.</p>';
       return;
     }
-    out.innerHTML = ['FIFO', 'LRU'].map((algo) => {
+    out.innerHTML = ['FIFO', 'LRU', 'MIN'].map((algo) => {
       const r = simulate(refs, n, algo);
-      const rows = r.steps.map((s) =>
-        '<tr><td>' + (s.index + 1) + '</td><td><strong>' + esc(s.page) + '</strong></td><td><span class="celle">' +
-        Array.from({ length: n }, (_, i) =>
-          '<span class="' + (s.frames[i] === s.page ? 'ora' : '') + '">' + (s.frames[i] ?? '-') + '</span>',
+      const frows = [];
+      for (let f = 0; f < n; f++) frows.push(f);
+      const cells = (fn) => r.steps.map((s, k) => fn(s, k)).join('');
+      return '<h3>' + algo + ' — <span class="conteggio-fault">' + r.faults + '</span> page fault</h3>' +
+        '<div class="tabella-scorre"><table class="dati"><tbody>' +
+        '<tr><th>#</th>' + cells((s) => '<td>' + (s.i + 1) + '</td>') + '</tr>' +
+        '<tr><th>Rif</th>' + cells((s) => '<td><strong>' + esc(s.page) + '</strong></td>') + '</tr>' +
+        '<tr><th>Esito</th>' + cells((s) =>
+          '<td><span class="gettone ' + (s.hit ? 'hit' : 'fault') + '">' + (s.hit ? 'HIT' : 'FLT') + '</span></td>') + '</tr>' +
+        frows.map((f) =>
+          '<tr><th>f' + f + '</th>' + cells((s) =>
+            '<td' + (s.frames[f] === s.page ? ' style="background:' + COLORS[0] + ';color:' + TEXTCOLOR + ';font-weight:700;"' : '') + '>' +
+            (s.frames[f] ?? '-') + '</td>') + '</tr>',
         ).join('') +
-        '</span></td><td><span class="gettone ' + (s.hit ? 'hit' : 'fault') + '">' + (s.hit ? 'HIT' : 'FAULT') + '</span></td>' +
-        '<td>' + (s.victim ?? '-') + '</td></tr>',
-      ).join('');
-      return '<div class="riquadro"><p class="sovratitolo">' + algo + '</p>' +
-        '<p><span class="conteggio-fault">' + r.faults + '</span> page fault</p>' +
-        '<div class="tabella-scorre"><table class="sim"><thead><tr><th>#</th><th>Ref</th><th>Frame</th><th>Esito</th><th>Vittima</th></tr></thead>' +
-        '<tbody>' + rows + '</tbody></table></div></div>';
+        '</tbody></table></div>';
     }).join('');
   }
 
-  document.getElementById('refs').addEventListener('input', render);
-  document.getElementById('frames').addEventListener('input', render);
+  /* ---------- scheduling RR ---------- */
+  let procs = [
+    { arrivo: '0', burst: '2/2/2' },
+    { arrivo: '0', burst: '3/1/3' },
+  ];
+
+  function parseBursts(text) {
+    const nums = text.split('/').map((s) => Number(s.trim())).filter((v) => Number.isFinite(v) && v > 0);
+    if (!nums.length || nums.length % 2 === 0) return null;
+    return { cpu: nums.filter((_, i) => i % 2 === 0), io: nums.filter((_, i) => i % 2 === 1) };
+  }
+
+  function simulateRR(list, q) {
+    const P = list.map((p, i) => ({
+      name: 'P' + (i + 1), arrival: p.arrival, cpu: p.b.cpu.slice(), io: p.b.io.slice(),
+      cpuI: 0, rem: p.b.cpu[0], done: -1,
+    }));
+    const ready = [];
+    const ioWait = [];
+    const arrived = new Set();
+    let running = null, qLeft = 0, ioRun = null;
+    const cpuL = [], ioL = [];
+    let t = 0;
+    const MAXT = 400;
+    while (t < MAXT && !P.every((p) => p.done >= 0)) {
+      P.forEach((p, i) => {
+        if (!arrived.has(i) && p.arrival <= t) { arrived.add(i); ready.push(i); }
+      });
+      if (running === null && ready.length) { running = ready.shift(); qLeft = q; }
+      if (ioRun === null && ioWait.length) {
+        const job = ioWait.shift();
+        ioRun = { p: job.i, rem: P[job.i].io[job.k] };
+      }
+      if (running === null && ioRun === null) {
+        const fut = P.map((p, i) => ({ p, i })).filter(({ p, i }) => !arrived.has(i) && p.done < 0);
+        if (!fut.length) break;
+        const nt = Math.min(...fut.map(({ p }) => p.arrival));
+        for (let k = t; k < nt; k++) { cpuL.push(null); ioL.push(null); }
+        t = nt;
+        continue;
+      }
+      cpuL.push(running);
+      ioL.push(ioRun ? ioRun.p : null);
+      if (running !== null) {
+        const p = P[running];
+        p.rem--; qLeft--;
+        if (p.rem === 0) {
+          if (p.cpuI < p.io.length) {
+            ioWait.push({ i: running, k: p.cpuI });
+            p.cpuI++;
+            p.rem = p.cpu[p.cpuI];
+          } else {
+            p.done = t + 1;
+          }
+          running = null;
+        } else if (qLeft === 0) {
+          ready.push(running);
+          running = null;
+        }
+      }
+      if (ioRun !== null) {
+        ioRun.rem--;
+        if (ioRun.rem === 0) { ready.push(ioRun.p); ioRun = null; }
+      }
+      t++;
+    }
+    return { cpuL, ioL, P, makespan: t, incomplete: t >= MAXT };
+  }
+
+  function renderSched() {
+    const q = Math.max(1, Number(document.getElementById('q').value) || 1);
+    const body = document.getElementById('proc-body');
+    body.innerHTML = '';
+    const list = [];
+    let bad = null;
+    procs.forEach((p, i) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td><strong>P' + (i + 1) + '</strong></td>' +
+        '<td><input type="number" min="0" value="' + esc(p.arrivo) + '" data-k="arrivo" data-i="' + i + '" style="width:4.5rem;" /></td>' +
+        '<td><input type="text" value="' + esc(p.burst) + '" data-k="burst" data-i="' + i + '" style="width:9rem;" /></td>' +
+        '<td><button class="pulsante" type="button" data-del="' + i + '">×</button></td>';
+      body.appendChild(tr);
+      const b = parseBursts(p.burst);
+      const arrival = Math.max(0, Number(p.arrivo) || 0);
+      if (!b) bad = 'P' + (i + 1) + ': burst non validi (forma CPU/I-O/CPU/…, numeri dispari > 0).';
+      else list.push({ arrival, b });
+    });
+    body.querySelectorAll('input').forEach((inp) =>
+      inp.addEventListener('input', (ev) => {
+        procs[Number(ev.target.dataset.i)][ev.target.dataset.k] = ev.target.value;
+        renderSched();
+      }),
+    );
+    body.querySelectorAll('[data-del]').forEach((btn) =>
+      btn.addEventListener('click', () => {
+        procs.splice(Number(btn.dataset.del), 1);
+        if (!procs.length) procs.push({ arrivo: '0', burst: '2/2/2' });
+        renderSched();
+      }),
+    );
+    const out = document.getElementById('out-sched');
+    if (bad) {
+      out.innerHTML = '<p class="vuoto">' + esc(bad) + '</p>';
+      return;
+    }
+    if (!list.length) {
+      out.innerHTML = '<p class="vuoto">Aggiungi almeno un processo.</p>';
+      return;
+    }
+    const r = simulateRR(list, q);
+    let head = '<tr><th>t</th>';
+    for (let t = 0; t < r.makespan; t++) head += '<td>' + t + '</td>';
+    head += '</tr>';
+    const row = (label, line) =>
+      '<tr><th>' + label + '</th>' + line.map((v) =>
+        v === null
+          ? '<td></td>'
+          : '<td style="background:' + COLORS[v % COLORS.length] + ';color:' + TEXTCOLOR + ';font-weight:700;">P' + (v + 1) + '</td>',
+      ).join('') + '</tr>';
+    const seq = r.P.map((p) => {
+      const parts = [];
+      p.cpu.forEach((c, k) => {
+        parts.push('CPU ' + c);
+        if (k < p.io.length) parts.push('I/O ' + p.io[k]);
+      });
+      return '<li><strong>P' + (P_index(p, r.P) + 1) + '</strong>: ' + parts.join(' → ') +
+        ' — fine a t=' + (p.done >= 0 ? p.done : '…') + '</li>';
+    }).join('');
+    out.innerHTML =
+      '<div class="tabella-scorre"><table class="dati"><tbody>' + head + row('CPU', r.cpuL) + row('I/O', r.ioL) +
+      '</tbody></table></div>' +
+      '<p><strong>Makespan:</strong> t=' + r.makespan +
+      (r.incomplete ? ' (simulazione fermata a 400 — controlla i dati)' : '') + '</p>' +
+      '<ul>' + seq + '</ul>';
+  }
+
+  function P_index(p, arr) { return arr.indexOf(p); }
+
+  document.getElementById('refs').addEventListener('input', renderPagine);
+  document.getElementById('frames').addEventListener('input', renderPagine);
   document.querySelectorAll('[data-preset]').forEach((b) =>
     b.addEventListener('click', () => {
       document.getElementById('refs').value = b.dataset.preset;
-      render();
+      renderPagine();
     }),
   );
-  render();
+  document.getElementById('q').addEventListener('input', renderSched);
+  document.getElementById('add-proc').addEventListener('click', () => {
+    procs.push({ arrivo: '0', burst: '2/2/2' });
+    renderSched();
+  });
+  renderPagine();
+  renderSched();
 </script>
