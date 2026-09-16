@@ -1,0 +1,53 @@
+---
+import Base from '../layouts/Base.astro';
+import { praticaFormat, praticaLinks, praticaRecent, praticaTemplates, praticaTips } from '../data/pratica.js';
+---
+<Base title="Prova pratica" active="/pratica/">
+  <p class="sovratitolo">Prova pratica di laboratorio · 40 punti</p>
+  <h1>Pratica: formato, template, temi recenti.</h1>
+  <p class="sottotitolo">
+    Internet è disponibile in aula. Template sotto: copiali, adattali, sappi spiegarli all’orale.
+    Testi ufficiali su <a href={praticaLinks.archive} target="_blank" rel="noreferrer">cs.unibo.it/~renzo/so/provapratica</a>
+    {' '}e archivio completo <a href={praticaLinks.tgz} target="_blank" rel="noreferrer">provapratica.tgz</a>.
+  </p>
+
+  <h2><span class="numero-cap">1</span>Il formato (sempre uguale)</h2>
+  {praticaFormat.map((item) => (
+    <details class="scheda">
+      <summary><h3>Es. {item.n} — {item.title}</h3><span class="apri">{item.points}</span></summary>
+      <div class="corpo">
+        <p>{item.body}</p>
+      </div>
+    </details>
+  ))}
+
+  <h2><span class="numero-cap">2</span>Template pronti</h2>
+  {praticaTemplates.map((t) => (
+    <details class="scheda">
+      <summary><h3>{t.title}</h3><span class="apri">Codice</span></summary>
+      <div class="corpo">
+        <div class="marginale"><span class="rubrica">Quando serve</span><p>{t.use}</p></div>
+        <pre><code>{t.code}</code></pre>
+      </div>
+    </details>
+  ))}
+
+  <h2><span class="numero-cap">3</span>Ultimi appelli pratici</h2>
+  {praticaRecent.map((item) => (
+    <div class="riquadro" style="margin-bottom:12px;">
+      <h3>{item.date} · <a href={item.url} target="_blank" rel="noreferrer">PDF ufficiale ↗</a></h3>
+      <p><strong>Ex.1:</strong> {item.ex1}</p>
+      <p><strong>Ex.2/3:</strong> {item.ex2}</p>
+    </div>
+  ))}
+
+  <h2><span class="numero-cap">4</span>Regole d’oro</h2>
+  <div class="spalti">
+    <div class="riquadro">
+      <h3>Prima di consegnare</h3>
+      {praticaTips.map((item) => (
+        <label><input type="checkbox" /><span>{item}</span></label>
+      ))}
+    </div>
+  </div>
+</Base>
