@@ -51,7 +51,15 @@ import { praticaFormat, praticaLinks, praticaRecent, praticaTemplates, praticaTi
     </div>
   </div>
 
-  <h2><span class="numero-cap">5</span>Prompt da dare all’AI in aula</h2>
+  <h2><span class="numero-cap">5</span>Riferimenti wiki del corso</h2>
+  <ul class="tight">
+    <li><a href="https://so.v2.cs.unibo.it/wiki/index.php/Il_%27%27catalogo%27%27_delle_System_Call" target="_blank" rel="noreferrer">Catalogo delle system call</a> — cosa esiste e cosa è obsoleto</li>
+    <li><a href="https://so.v2.cs.unibo.it/wiki/index.php/Syscall_per_file_system:_equivalenza_comandi" target="_blank" rel="noreferrer">Syscall filesystem ↔ comandi</a> — mkdir/link/symlink e i loro ritorni</li>
+    <li><a href="https://so.v2.cs.unibo.it/wiki/index.php/Fork_vs_exec" target="_blank" rel="noreferrer">Fork vs exec</a> — cosa eredita il figlio (classico orale)</li>
+    <li><a href="https://so.v2.cs.unibo.it/wiki/index.php/Linguaggio_C,_libreria_C,_sistema_operativo" target="_blank" rel="noreferrer">C, libreria C, sistema operativo</a> — toolchain gcc</li>
+  </ul>
+
+  <h2><span class="numero-cap">6</span>Prompt da dare all’AI in aula</h2>
   <p>Copia il testo qui sotto, incollalo in chat insieme alla consegna dell’esercizio.</p>
   <p><button class="pulsante primo" id="copia-prompt" type="button">Copia il prompt</button></p>
   <pre><code id="testo-prompt">Contesto: esame pratico di Sistemi Operativi (UniBo, Davoli), programmi C POSIX e script bash/Python su Linux a 64 bit.
@@ -60,6 +68,9 @@ Materiali di riferimento (leggili prima di rispondere):
 - Template C/bash/Python: https://so.rickywanga.com/pratica/
 - Metodo e controlli: https://so.rickywanga.com/template/
 - Archivio testi ufficiali: https://www.cs.unibo.it/~renzo/so/provapratica.shtml
+- Wiki corso: catalogo syscall https://so.v2.cs.unibo.it/wiki/index.php/Il_%27%27catalogo%27%27_delle_System_Call
+- Wiki corso: syscall filesystem https://so.v2.cs.unibo.it/wiki/index.php/Syscall_per_file_system:_equivalenza_comandi
+- Wiki corso: fork vs exec https://so.v2.cs.unibo.it/wiki/index.php/Fork_vs_exec
 
 Regole tassative per il codice C:
 - MAI system(), popen(), exec di "sh -c".
