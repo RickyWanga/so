@@ -50,4 +50,47 @@ import { praticaFormat, praticaLinks, praticaRecent, praticaTemplates, praticaTi
       ))}
     </div>
   </div>
+
+  <h2><span class="numero-cap">5</span>Prompt da dare all’AI in aula</h2>
+  <p>Copia il testo qui sotto, incollalo in chat insieme alla consegna dell’esercizio.</p>
+  <p><button class="pulsante primo" id="copia-prompt" type="button">Copia il prompt</button></p>
+  <pre><code id="testo-prompt">Contesto: esame pratico di Sistemi Operativi (UniBo, Davoli), programmi C POSIX e script bash/Python su Linux a 64 bit.
+
+Materiali di riferimento (leggili prima di rispondere):
+- Template C/bash/Python: https://so.rickywanga.com/pratica/
+- Metodo e controlli: https://so.rickywanga.com/template/
+- Archivio testi ufficiali: https://www.cs.unibo.it/~renzo/so/provapratica.shtml
+
+Regole tassative per il codice C:
+- MAI system(), popen(), exec di "sh -c".
+- Ogni system call con controllo del ritorno + perror().
+- Compilabile con gcc -Wall senza warning.
+- Makefile minimo con target all e clean.
+
+Quando ti incollo la consegna:
+1. indica quale template usare e perché,
+2. scrivi il codice completo adattato alla consegna,
+3. spiegami ogni scelta in 2-3 righe (devo ridirla all’orale).
+
+CONSEGNA:
+[incolla qui il testo dell’esercizio]</code></pre>
 </Base>
+
+<script is:inline>
+  document.getElementById('copia-prompt').addEventListener('click', async (ev) => {
+    const testo = document.getElementById('testo-prompt').textContent;
+    const btn = ev.currentTarget;
+    try {
+      await navigator.clipboard.writeText(testo);
+      btn.textContent = 'Copiato ✓';
+    } catch (e) {
+      const r = document.createRange();
+      r.selectNodeContents(document.getElementById('testo-prompt'));
+      const s = getSelection();
+      s.removeAllRanges();
+      s.addRange(r);
+      btn.textContent = 'Selezionato: premi Ctrl+C';
+    }
+    setTimeout(() => { btn.textContent = 'Copia il prompt'; }, 2500);
+  });
+</script>
