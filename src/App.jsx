@@ -8,6 +8,7 @@ const allExercises = [...exercises, ...g1schedA, ...g1schedB, ...g1rimp]
 const allTopics = ['Tutti', ...Array.from(new Set(allExercises.map((e) => e.topic))).sort()]
 import { g2Areas, g2Questions } from './data/g2.js'
 import { templates } from './data/templates.js'
+import { praticaFormat, praticaLinks, praticaRecent, praticaTemplates, praticaTips } from './data/pratica.js'
 import { g1Recent, g1Stats, g2New, g2Stats, g2Top } from './data/stats.js'
 import {
   finalRanking,
@@ -21,6 +22,7 @@ const navItems = [
   ['home', 'Home'],
   ['exercises', 'Esercizi'],
   ['g2', 'G2'],
+  ['pratica', 'Pratica'],
   ['template', 'Template'],
   ['stats', 'Statistiche'],
   ['simulator', 'Simulatore'],
@@ -127,6 +129,7 @@ function App() {
           />
         )}
         {activePage === 'g2' && <G2Page key={`g2-${route.arg1 || ''}`} initialArea={route.arg1} />}
+        {activePage === 'pratica' && <PraticaPage />}
         {activePage === 'template' && <TemplatePage navigate={navigate} />}
         {activePage === 'stats' && <StatisticsPage navigate={navigate} />}
         {activePage === 'simulator' && <SimulatorPage />}
@@ -996,6 +999,69 @@ function SimulatorPage() {
           <li>Riferisci la pagina espulsa da FIFO ma conservata da LRU.</li>
         </ol>
       </section>
+    </div>
+  )
+}
+
+function PraticaPage() {
+  return (
+    <div>
+      <header className="page-head">
+        <p className="eyebrow">Prova pratica di laboratorio · 40 punti</p>
+        <h1>Pratica: formato, template, temi recenti</h1>
+        <p className="lead">
+          Internet è disponibile in aula. Template sotto: copiali, adattali, sappi spiegarli
+          all’orale. Testi ufficiali su{' '}
+          <a href={praticaLinks.archive} target="_blank" rel="noreferrer">cs.unibo.it/~renzo/so/provapratica</a>
+          {' '}e archivio completo{' '}
+          <a href={praticaLinks.tgz} target="_blank" rel="noreferrer">provapratica.tgz</a>.
+        </p>
+      </header>
+
+      <section className="card-grid">
+        {praticaFormat.map((item) => (
+          <article className="pattern-card" key={item.n}>
+            <div className="pattern-card-head">
+              <span className="area-badge">Es. {item.n}</span>
+              <span className="freq-badge">{item.points}</span>
+            </div>
+            <h3>{item.title}</h3>
+            <p>{item.body}</p>
+          </article>
+        ))}
+      </section>
+
+      <h2 className="section-title">Template pronti</h2>
+      {praticaTemplates.map((item) => (
+        <details className="exercise-card" key={item.id}>
+          <summary>
+            <span className="exercise-title">{item.title}</span>
+          </summary>
+          <p className="exercise-text">{item.use}</p>
+          <CodeBlock code={item.code} />
+        </details>
+      ))}
+
+      <h2 className="section-title">Ultimi appelli pratici</h2>
+      <section className="stat-grid">
+        {praticaRecent.map((item) => (
+          <article className="stat-card" key={item.date}>
+            <div className="pattern-card-head">
+              <span className="area-badge">{item.date}</span>
+              <a href={item.url} target="_blank" rel="noreferrer">PDF ufficiale ↗</a>
+            </div>
+            <p><strong>Ex.1:</strong> {item.ex1}</p>
+            <p><strong>Ex.2/3:</strong> {item.ex2}</p>
+          </article>
+        ))}
+      </section>
+
+      <h2 className="section-title">Regole d’oro</h2>
+      <div className="checklist-card">
+        <ul>
+          {praticaTips.map((item) => <li key={item}>{item}</li>)}
+        </ul>
+      </div>
     </div>
   )
 }
