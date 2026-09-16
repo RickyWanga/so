@@ -56,12 +56,16 @@ import { g2Areas, g2Questions } from '../data/g2.js';
       el.innerHTML =
         '<summary><div class="etichette"><span class="etichetta">' + esc(item.area) + '</span>' +
         (item.hot ? '<span class="etichetta calda">Calda</span>' : '') + '</div>' +
-        '<h3>' + esc(item.question) + '</h3>' +
-        '<span class="apri">Risposta</span></summary>' +
+        '<div class="riga"><h3>' + esc(item.question) + '</h3>' +
+        '<span class="apri">Risposta</span></div></summary>' +
         '<div class="corpo">' +
         '<p class="fonte">Uscita: ' + esc(item.source) + '</p>' +
         '<div class="marginale"><span class="rubrica">Risposta</span><p>' + esc(item.answer) + '</p></div></div>';
       list.appendChild(el);
+      el.addEventListener('toggle', () => {
+        const b = el.querySelector('.apri');
+        if (b) b.textContent = el.open ? 'Chiudi' : 'Risposta';
+      });
     }
     $('count').textContent = n;
     $('total').textContent = data.length + ' totali';

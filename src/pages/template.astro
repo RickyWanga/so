@@ -48,9 +48,8 @@ const checklist = [
       {group.patterns.map((p) => (
         <details class="scheda">
           <summary>
-            <h3>{p.name}</h3>
+            <div class="riga"><h3>{p.name}</h3><span class="apri">Ricetta e controlli</span></div>
             <p class="testo-domanda"><strong>Si riconosce da — </strong>{p.trigger}</p>
-            <span class="apri">Ricetta e controlli</span>
           </summary>
           <div class="corpo">
             <div class="marginale"><span class="rubrica">Ricetta</span><p>{p.recipe}</p></div>
@@ -70,7 +69,7 @@ const checklist = [
       <h3>{part}</h3>
       {templates.filter((t) => t.part === part).map((t) => (
         <details class="scheda">
-          <summary><h3>{t.title}</h3><span class="apri">Codice</span></summary>
+          <summary><div class="riga"><h3>{t.title}</h3><span class="apri">Codice</span></div></summary>
           <div class="corpo">
             {t.intro && <div class="marginale"><span class="rubrica">Regola</span><p>{t.intro}</p></div>}
             {t.code && <pre><code>{t.code}</code></pre>}

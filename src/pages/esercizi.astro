@@ -71,9 +71,9 @@ const topics = ['Tutti', ...Array.from(new Set(all.map((e) => e.topic))).sort()]
         '<span class="etichetta">' + esc(e.topic) + '</span>' +
         (e.focus ? '<span class="etichetta calda">Focus</span>' : '') +
         (e.reconstructed ? '<span class="etichetta">Ricostruito</span>' : '') + '</div>' +
-        '<h3>' + esc(e.title) + '</h3>' +
-        '<p class="testo-domanda">' + esc(e.statement) + '</p>' +
-        '<span class="apri">Svolgimento</span></summary>' +
+        '<div class="riga"><h3>' + esc(e.title) + '</h3>' +
+        '<span class="apri">Svolgimento</span></div>' +
+        '<p class="testo-domanda">' + esc(e.statement) + '</p></summary>' +
         '<div class="corpo">' +
         '<p class="fonte">Fonte: ' + esc(e.source) +
         (e.sourceUrl ? ' — <a href="' + esc(e.sourceUrl) + '" target="_blank" rel="noreferrer">PDF ufficiale ↗</a>' : '') + '</p>' +
@@ -88,6 +88,10 @@ const topics = ['Tutti', ...Array.from(new Set(all.map((e) => e.topic))).sort()]
         (e.pitfalls || []).map((x) => '<li>' + esc(x) + '</li>').join('') +
         '</ul></div></div></div>';
       list.appendChild(el);
+      el.addEventListener('toggle', () => {
+        const b = el.querySelector('.apri');
+        if (b) b.textContent = el.open ? 'Chiudi' : 'Svolgimento';
+      });
     }
     $('count').textContent = n;
     $('total').textContent = data.length + ' totali';

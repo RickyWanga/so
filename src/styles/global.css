@@ -134,17 +134,21 @@ a:hover { text-decoration: underline; }
 .scheda summary { cursor: pointer; list-style: none; }
 .scheda summary::-webkit-details-marker { display: none; }
 .scheda summary h3 { display: inline; font-size: 1.02rem; }
+.riga { display: flex; align-items: center; gap: 0.7rem; }
+.riga h3 { flex: 1 1 auto; margin: 0; font-size: 1.02rem; }
+.riga h3::before { content: "+ "; color: var(--muted); font-weight: 400; }
+.scheda[open] .riga h3::before { content: "– "; }
 .scheda summary h3::before { content: "+ "; color: var(--muted); font-weight: 400; }
 .scheda[open] summary h3::before { content: "– "; }
 .scheda .testo-domanda { color: var(--muted); margin: 0.25rem 0 0; font-size: 0.95rem; }
 .apri {
-  display: inline-block; margin-top: 0.55rem;
-  color: var(--accent); font-size: 0.85rem; font-weight: 600;
-  border: 1px solid var(--border); border-radius: 999px;
-  padding: 0.28rem 0.85rem; background: var(--panel);
+  flex-shrink: 0; margin-left: auto; white-space: nowrap;
+  color: var(--accent); font-size: 0.85rem; font-weight: 700;
+  border: 1px solid var(--accent); border-radius: 999px;
+  padding: 0.32rem 0.95rem; background: var(--accent-soft); cursor: pointer;
 }
-.scheda summary:hover .apri { border-color: var(--accent); }
-.scheda[open] .apri { background: var(--accent-soft); }
+.scheda summary:hover .apri { filter: brightness(0.96); }
+.scheda[open] .apri { background: var(--accent); border-color: var(--accent); color: #fff; }
 .scheda .corpo { padding: 0.7rem 0 0.3rem; }
 .etichette { margin-bottom: 0.25rem; }
 .etichetta {
@@ -208,3 +212,22 @@ table.sim th, table.sim td { border-bottom: 1px solid var(--border); padding: 0.
 .passaggi { display: grid; gap: 0.45rem; margin-top: 0.75rem; }
 .passaggi div { display: flex; gap: 0.7rem; align-items: baseline; }
 .passaggi strong { color: var(--muted); font-size: 0.9rem; }
+
+/* ---------- mobile ---------- */
+@media (max-width: 640px) {
+  body { font-size: 15px; }
+  h1 { font-size: 1.55rem; }
+  main { padding: 1.5rem 0 3.5rem; }
+  .wrap { padding: 0 1rem; }
+  .masthead .wrap { gap: 0.8rem; }
+  .masthead nav a { padding: 0.4rem 0.55rem; font-size: 0.86rem; }
+  .filtri label { flex: 1 1 100%; }
+  .filtri input[type="text"], .filtri input:not([type="checkbox"]), .filtri select { min-width: 0; width: 100%; }
+  .tappe li { grid-template-columns: 2rem 1fr; gap: 0.7rem; }
+  .riga { gap: 0.5rem; flex-wrap: wrap; }
+  .riga h3 { flex: 1 1 100%; }
+  .apri { padding: 0.3rem 0.7rem; font-size: 0.8rem; margin-left: 0; }
+  pre { font-size: 0.76rem; padding: 0.7rem 0.8rem; }
+  table.dati { font-size: 0.82rem; }
+  table.sim { font-size: 0.74rem; }
+}

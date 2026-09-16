@@ -14,7 +14,7 @@ import { praticaFormat, praticaLinks, praticaRecent, praticaTemplates, praticaTi
   <h2><span class="numero-cap">1</span>Il formato (sempre uguale)</h2>
   {praticaFormat.map((item) => (
     <details class="scheda">
-      <summary><h3>Es. {item.n} — {item.title}</h3><span class="apri">{item.points}</span></summary>
+      <summary><div class="riga"><h3>Es. {item.n} — {item.title}</h3><span class="apri">{item.points}</span></div></summary>
       <div class="corpo">
         <p>{item.body}</p>
       </div>
@@ -24,7 +24,7 @@ import { praticaFormat, praticaLinks, praticaRecent, praticaTemplates, praticaTi
   <h2><span class="numero-cap">2</span>Template pronti</h2>
   {praticaTemplates.map((t) => (
     <details class="scheda">
-      <summary><h3>{t.title}</h3><span class="apri">Codice</span></summary>
+      <summary><div class="riga"><h3>{t.title}</h3><span class="apri">Codice</span></div></summary>
       <div class="corpo">
         <div class="marginale"><span class="rubrica">Quando serve</span><p>{t.use}</p></div>
         <pre><code>{t.code}</code></pre>
